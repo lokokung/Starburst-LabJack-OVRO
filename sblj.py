@@ -311,3 +311,32 @@ class LONoiseLJ(StarburstLJ):
                 raise InvalidLOFreqError()
         else:
             raise NoConnectionError(self.identifier)
+       
+       
+    """
+    Method: setNoiseSourceOn
+        Description:
+            Turns the noise source on the LO/Noise Source board on entirely.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the
+                LabJack unit.
+    """
+    def setNoiseSourceOn(self):
+        if self.handle is not None:
+            ljm.eWriteName(self.handle, "EIO0", 1)
+        else:
+            raise NoConnectionError(self.identifier)
+    
+    """
+    Method: setNoiseSourceOff
+        Description:
+            Turns the noise source on the LO/Noise Source board off entirely.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the
+                LabJack unit.
+    """
+    def set NoiseSourceOff(self):
+        if self.handle is not None:
+            ljm.eWriteName(self.handle, "EIO0", 0)
+        else:
+            raise NoConnectionError(self.identifier)
