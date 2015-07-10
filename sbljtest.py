@@ -33,7 +33,8 @@ class TestGenericLabJackMonitorVars(unittest.TestCase):
     """
         Monkey patching method for LJM Library in order to unit test 
         effectively. The new method is injected in the setUp and removed 
-        in the tearDown to allow for running of individual test cases in this group.
+        in the tearDown to allow for running of individual test cases in 
+        this group.
     """
     def eReadName(self, handle, name):
         return self.mockLabJackValues[name]
@@ -45,9 +46,9 @@ class TestGenericLabJackMonitorVars(unittest.TestCase):
         self.lj = sblj.StarburstLJ("ANY","ANY","ANY","MOCK")
         
         self.o_eReadName = ljm.eReadName
-        ljm.eReadName = self.eReadName
-        
         self.o_eReadNameString = ljm.eReadNameString
+        
+        ljm.eReadName = self.eReadName
         ljm.eReadNameString = self.eReadNameString
         
     def tearDown(self):
@@ -132,7 +133,7 @@ class TestGenericLabJackMonitorVars(unittest.TestCase):
         self.assertTrue(dict.has_key("TIMESTAMP"))
 
     """
-     Test - test_name:
+    Test - test_name:
         Given that the LabJack's name is "MockLabJack",
         Then getLJMonitorVar(["NAME"]) returns "MockLabJack",
         And a time stamp is returned.
@@ -183,10 +184,85 @@ class TestGenericLabJackConnections(unittest.TestCase):
         self.assertRaises(TypeError, sblj.StarburstLJ, 
                           "FAKE", "ANY", 10)                  
                           
+
+"""
+TestGenericLabJackName Test Group Description:
+    This group of tests makes sure that we write a name to the LabJack modules.
+    
+    Test Count: 4
+"""
+class TestGenericLabJackName(unittest.TestCase):
+    """
+        Monkey patching method for LJM Library in order to unit test 
+        effectively. The new method is injected in the setUp and removed 
+        in the tearDown to allow for running of individual test cases in 
+        this group.
+    """
+    def eReadNameString(self, handle, name):
+        return self.ljName
+        
+    def eWriteNameString(self, handle, name, newName):
+        self.ljName = newName
+        
+    def setUp(self):
+        self.lj = sblj.StarburstLJ("ANY","ANY","ANY","MOCK")
+        self.ljName = "MockLabJack"
+        
+        self.o_eReadNameString = ljm.eReadNameString
+        self.o_eWriteNameString = ljm.eWriteNameString
+        
+        ljm.eReadNameString = self.eReadNameString
+        ljm.eWriteNameString = self.eWriteNameString
+        
+    def tearDown(self):
+        ljm.eReadNameString = self.o_eReadNameString
+        ljm.eWriteNameString = self.o_eWriteNameString
+        
+    """
+    Test - test_writeNameToLabJack:
+        Given that the we change the LabJack's name to "NewName", 
+        Then the change is reflected when we check it.
+    """
+    def test_writeNameToLabJack(self):
+        dict = self.lj.getLJMonitorVar(["NAME"])
+        self.assertEqual(dict["NAME"], "MockLabJack")
+        
+        self.lj.setLJName("NewName")
+        
+        dict = self.lj.getLJMonitorVar(["NAME"])
+        self.assertEqual(dict["NAME"], "NewName")
+        
+    """
+    Test - test_nameTooLong:
+        Given that a name that exceeds 49 character is used,
+        Then a TypeError will be thrown.
+    """
+    def test_nameTooLong(self):
+        self.assertRaises(TypeError, self.lj.setLJName,
+                          "ThisNameHasMoreThan49CharactersSoItShouldCauseFail")
+    
+    """
+    Test - test_nameWithPeriods:
+        Given that a name has periods,
+        Then a TypeError will be thrown.
+    """
+    def test_nameWithPeriods(self):
+        self.assertRaises(TypeError, self.lj.setLJName,
+                          "This.Name.Has.Periods")
+    
+    """
+    Test - test_throwExceptionWhenDisconnect
+        Given that one disconnected from a StarburstLJ object,
+        Then calling setLJName results in NoConnectionError. 
+    """
+    def test_throwExceptionWhenDisconnect(self):
+        self.lj.disconnect()
+        self.assertRaises(sblj.NoConnectionError, 
+                          self.lj.setLJName, "Name")
         
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestGenericLabJackMonitorVars)
+        TestGenericLabJackName)
     unittest.TextTestRunner(verbosity=2).run(suite)
         
         

@@ -223,7 +223,8 @@ class StarburstLJ(object):
                 LabJack unit.
     """
     def setLJName(self, name):
-        if not isinstance(name, str) or len(name) > 49 or "." in name:
+        name = str(name)
+        if len(name) > 49 or "." in name:
             raise TypeError("Expected a string instead of " + 
                             str(type(name)) + 
                             " with less than 49 characters and no periods.")
