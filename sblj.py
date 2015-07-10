@@ -6,6 +6,7 @@
 
 from labjack import ljm
 import datetime
+import sbljconstants as const
 
 """
 Class: UnknownDeviceError extends Exception
@@ -42,7 +43,16 @@ class NoConnectionError(Exception):
     def __str__(self):
         return("There is no connection to device " + identifier)
 
-
+"""
+Class: InvalidLOFreqError extends Exception
+    Description:
+        Custom error for checking that a given LO setting is valid when trying
+        to change.
+"""
+class InvalidLOFreqError(Exception):
+    def __str__(self):
+        return("Please refer to sbljconstant.py for LO frequency constants," +
+               " or documentation for usage.")
 """
 Class: StarburstLJ extends Object
     Description: 
@@ -50,16 +60,17 @@ Class: StarburstLJ extends Object
         used in the Starburst project.
     Arguments: 
         identifier: string representation of an identification for designated
-            LabJack. This can be a serial number, an ip address, or a name. Names
-            cannot contain periods. Default value set to "ANY" to allow for any
-            LabJack to be chosen.
-        connectionType: string representation of how the LabJack is connected to 
-            the computer. Can be "ETHERNET", "USB", "TCP", "ANY", or other 
-            connection types supported by the LabJack LMJ library. (Refer to their
-            documentation for details.) Default value set to "ETHERNET".
-        deviceType: string representation of LabJack device. Can be "T7", "ANY", 
-            or other types supported by the LabJack LMJ library. (Refer to their
-            documentation for details.) Default value set to "T7".
+            LabJack. This can be a serial number, an ip address, or a name. 
+            Names cannot contain periods. Default value set to "ANY" to allow 
+            for any LabJack to be chosen.
+        connectionType: string representation of how the LabJack is connected 
+            to the computer. Can be "ETHERNET", "USB", "TCP", "ANY", or other 
+            connection types supported by the LabJack LMJ library. (Refer to 
+            their documentation for details.) Default value set to "ETHERNET".
+        deviceType: string representation of LabJack device. Can be "T7", 
+            "ANY", or other types supported by the LabJack LMJ library. 
+            (Refer to their documentation for details.) Default value set 
+            to "T7".
         handle: LMJ handle object. The option to directly pass in the handle 
             object is used for unit testing. Otherwise, refrain from directly 
             passing the LMJ handle object.
@@ -234,11 +245,69 @@ class StarburstLJ(object):
         else:
             raise NoConnectionError(self.identifier)
         
-        
+
+"""
+Class: LONoiseLJ extends StarburstLJ
+    Description:
+        Custom object that represents a LO/Noise Source LabJack control unit
+        used in the Starburst project.
+    Arguments:
+        (Same as those of StarburstLJ. Refer to the description above.)
+    Raises:
+        (Same as those of StarburstLJ. Refer to the description above.)
+"""        
 class LONoiseLJ(StarburstLJ):
     def __init__(self, identifier="ANY", connectionType="ETHERNET", 
                  deviceType="T7", handle=None):
         super(LONoiseLJ, self).__init__(identifier, connectionType,
                                         deviceType, handle)
-                                        
+
+    """
+        Private LO frequency setting methods. Do NOT call these methods 
+        directly, instead, use the setLOFreq method. These methods are
+        not error checked. 
+    """
+    def __setFreq(self, leftBit, rightBit):
+        ljm.eWriteName(self.handle, "EIO3", rightBit)
+        ljm.eWriteName(self.handle, "EIO4", leftBit)
     
+    def __3_4GHZ(self):
+        self.__setFreq(0, 0)
+        
+    def __7_5GHZ(self):
+        self.__setFreq(0, 1)
+        
+    def __11_5GHZ(self):
+        self.__setFreq(1, 0)
+        
+    def __15_5GHZ(self):
+        self.__setFreq(1, 1)
+    
+    """
+        Dictionary lookup for LO settings and corresponding methods.
+    """
+    ljLODict = {const.LO_3_4GHZ: __3_4GHZ, const.LO_7_5GHZ: __7_5GHZ,
+                const.LO_11_5GHZ: __11_5GHZ, const.LO_15_5GHZ: __15_5GHZ}
+    
+    """
+    Method: setLOFreq(freq)
+        Description:
+            Sets the LO frequency to the desired level.
+        Arguments:
+            freq: a frequency option defined in sbljconstants.py. Please refer
+                there for the constant values.
+        Raises:
+            InvalidLOFreqError: occurs when freq is not a defined frequency 
+                option from sbljconstants.py.
+            NoConnectionError: occurs when there is no connection to the
+                LabJack unit.
+            
+    """
+    def setLOFreq(self, freq):
+        if self.handle is not None:
+            try:
+                LONoiseLJ.ljLODict[freq](self)
+            except KeyError:
+                raise InvalidLOFreqError()
+        else:
+            raise NoConnectionError(self.identifier)

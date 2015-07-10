@@ -7,6 +7,7 @@
 import unittest
 from labjack import ljm
 import sblj
+import sbljconstants as const
 
 """
 TestGenericLabJackMonitorVars Test Group Description:
@@ -31,7 +32,7 @@ class TestGenericLabJackMonitorVars(unittest.TestCase):
                          'DEVICE_NAME_DEFAULT': 'MockLabJack'}
     
     """
-        Monkey patching method for LJM Library in order to unit test 
+        Monkey patching methods for LJM Library in order to unit test 
         effectively. The new method is injected in the setUp and removed 
         in the tearDown to allow for running of individual test cases in 
         this group.
@@ -259,10 +260,79 @@ class TestGenericLabJackName(unittest.TestCase):
         self.lj.disconnect()
         self.assertRaises(sblj.NoConnectionError, 
                           self.lj.setLJName, "Name")
+    
+
+"""
+TestLONoiseLabJackLOFreq Test Group Description:
+    This group of tests makes sure that we can get/set the LO frequency and that 
+    the settings are correct. 
+    
+    Test Count: 1
+"""
+class TestLONoiseLabJackLOFreq(unittest.TestCase):
+    """
+        Monkey patching methods for LJM Library in order to unit test 
+        effectively. The new method is injected in the setUp and removed 
+        in the tearDown to allow for running of individual test cases in 
+        this group.
+    """
+    def eWriteName(self, handle, name, newVal):
+        if(name is "EIO3"):
+            self.rightBit = newVal
+        else:
+            self.leftBit = newVal
+    
+    def setUp(self):
+        self.leftBit = 0
+        self.rightBit = 0
+        self.lj = sblj.LONoiseLJ("","","","MOCK")
         
+        self.o_eWriteName = ljm.eWriteName
+        
+        ljm.eWriteName = self.eWriteName
+        
+    def tearDown(self):
+        ljm.eWriteName = self.o_eWriteName
+    
+    """
+    Test - test_allLOFreqAreCorrespondinglyCorrect:
+        Given that we set the LO level,
+        Then, the two bits that communicate with the daughter board are set 
+            accordingly.
+    """
+    def test_allLOFreqAreCorrespondinglyCorrect(self):
+        """
+            Testing 3.4GHz.
+        """
+        self.lj.setLOFreq(const.LO_3_4GHZ)
+        self.assertEqual(self.leftBit, 0)
+        self.assertEqual(self.rightBit, 0)
+        
+        """
+            Testing 7.5GHz.
+        """
+        self.lj.setLOFreq(const.LO_7_5GHZ)
+        self.assertEqual(self.leftBit, 0)
+        self.assertEqual(self.rightBit, 1)
+        
+        """
+            Testing 11.5GHz.
+        """
+        self.lj.setLOFreq(const.LO_11_5GHZ)
+        self.assertEqual(self.leftBit, 1)
+        self.assertEqual(self.rightBit, 0)
+        
+        """
+            Testing 15.5GHz.
+        """
+        self.lj.setLOFreq(const.LO_15_5GHZ)
+        self.assertEqual(self.leftBit, 1)
+        self.assertEqual(self.rightBit, 1)
+
+    
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestGenericLabJackName)
+        TestLONoiseLabJackLOFreq)
     unittest.TextTestRunner(verbosity=2).run(suite)
         
         
