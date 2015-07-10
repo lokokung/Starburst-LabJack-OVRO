@@ -146,9 +146,10 @@ class StarburstLJ(object):
     def disconnect(self):
         try:
             ljm.close(self.handle)
-            self.handle = None
-        except LJMError:
+        except ljm.LJMError:
             pass
+        finally:
+            self.handle = None
     
     """
     Main query to LabJack modules for generic hardware information. Pass a 

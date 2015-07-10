@@ -129,7 +129,7 @@ TestGenericLabJackConnections Test Group Description:
     This group of tests makes sure that exceptions are thrown when connections
     to LabJacks are not made or cannot be made.
     
-    Test Count: 1
+    Test Count: 3
 """
 class TestGenericLabJackConnections(unittest.TestCase):
     
@@ -141,6 +141,29 @@ class TestGenericLabJackConnections(unittest.TestCase):
     def test_throwExceptionWhenLabJackNotExist(self):
         self.assertRaises(sblj.UnknownDeviceError, 
                           sblj.StarburstLJ, "FakeName")
+    
+    """
+    Test - test_throwExceptionWhenDisconnect:
+        Given that one disconnected from a StarburstLJ object,
+        Then calling getters on that object results in NoConnectionError.
+    """
+    def test_throwExceptionWhenDisconnect(self):
+        lj = sblj.StarburstLJ("","","","FAKE")
+        lj.disconnect()
+        self.assertRaises(sblj.NoConnectionError, 
+                          lj.getLJMonitorVar)
+                          
+    """
+    Test - test_throwExceptionWhenInvalidParam:
+        Given that either the deviceType or connectionType is not a string,
+        Then a TypeError is thrown.
+    """
+    def test_throwExceptionWhenInvalidParam(self):
+        self.assertRaises(TypeError, sblj.StarburstLJ, 
+                          "FAKE", 10, "ANY")
+        self.assertRaises(TypeError, sblj.StarburstLJ, 
+                          "FAKE", "ANY", 10)                  
+                          
         
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
