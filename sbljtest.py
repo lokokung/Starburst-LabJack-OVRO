@@ -1,7 +1,7 @@
 """
-STARBURST LabJack Control Wrapper Library Test Suite
-Author: Lokbondo Kung
-Email: lkkung@caltech.edu
+    STARBURST LabJack Control Wrapper Library Test Suite
+    Author: Lokbondo Kung
+    Email: lkkung@caltech.edu
 """
 
 import unittest
@@ -14,12 +14,12 @@ TestGenericLabJackMonitorVars Test Group Description:
     returns values on a LabJack with given names, that the getLJMonitorVar
     function returns the correct output. 
     
-    Test Count: 7
+    Test Count: 8
 """
 class TestGenericLabJackMonitorVars(unittest.TestCase):
     """
-    Dictionary of values that the mock LabJack will return for call with 
-    names corresponding to the keys of the dictionary.
+        Dictionary of values that the mock LabJack will return for call with 
+        names corresponding to the keys of the dictionary.
     """
     mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
                          'TEMPERATURE_AIR_K': 298,
@@ -27,14 +27,18 @@ class TestGenericLabJackMonitorVars(unittest.TestCase):
                          'AIN5': 7.5,
                          'AIN6': 6,
                          'AIN7': 5,
-                         'AIN9': -5}
+                         'AIN9': -5,
+                         'DEVICE_NAME_DEFAULT': 'MockLabJack'}
     
     """
-    Monkey patching method for LJM Library in order to unit test effectively.
-    The new method is injected in the setUp and removed in the tearDown to 
-    allow for running of individual test cases in this group.
+        Monkey patching method for LJM Library in order to unit test 
+        effectively. The new method is injected in the setUp and removed 
+        in the tearDown to allow for running of individual test cases in this group.
     """
     def eReadName(self, handle, name):
+        return self.mockLabJackValues[name]
+        
+    def eReadNameString(self, handle, name):
         return self.mockLabJackValues[name]
     
     def setUp(self):
@@ -43,8 +47,12 @@ class TestGenericLabJackMonitorVars(unittest.TestCase):
         self.o_eReadName = ljm.eReadName
         ljm.eReadName = self.eReadName
         
+        self.o_eReadNameString = ljm.eReadNameString
+        ljm.eReadNameString = self.eReadNameString
+        
     def tearDown(self):
         ljm.eReadName = self.o_eReadName
+        ljm.eReadNameString = self.o_eReadNameString
     
     """
     Test - test_temperatureOfLabJack:
@@ -123,7 +131,18 @@ class TestGenericLabJackMonitorVars(unittest.TestCase):
         self.assertEqual(dict["NEG5V"], -5)
         self.assertTrue(dict.has_key("TIMESTAMP"))
 
-        
+    """
+     Test - test_name:
+        Given that the LabJack's name is "MockLabJack",
+        Then getLJMonitorVar(["NAME"]) returns "MockLabJack",
+        And a time stamp is returned.
+    """
+    def test_name(self):
+        dict = self.lj.getLJMonitorVar(["NAME"])
+        self.assertEqual(dict["NAME"], "MockLabJack")
+        self.assertTrue(dict.has_key("TIMESTAMP"))
+    
+    
 """
 TestGenericLabJackConnections Test Group Description:
     This group of tests makes sure that exceptions are thrown when connections
@@ -167,7 +186,7 @@ class TestGenericLabJackConnections(unittest.TestCase):
         
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestGenericLabJackConnections)
+        TestGenericLabJackMonitorVars)
     unittest.TextTestRunner(verbosity=2).run(suite)
         
         
