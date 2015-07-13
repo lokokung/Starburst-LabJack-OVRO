@@ -269,7 +269,7 @@ class LONoiseLJ(StarburstLJ):
             LOFREQ: Current set LO setting.
             NSSTATUS: On/Off status of noise source (0=off, 1=on).
         """        
-        self.ljLOVariables = ["LOFREQ", "NSSTATUS"]
+        self.ljLOVariables = ["LOFREQ", "NSSTAT"]
         self.ljVariables.extend(self.ljLOVariables)
         self.LOConstantNames = {value: name for name, 
                                 value in vars(const.LOFreqConst).items() 
@@ -295,7 +295,7 @@ class LONoiseLJ(StarburstLJ):
         Dictionary lookup for parameters (Placed here because the 
         corresponding methods that are pointed to must be defined first.)
     """
-    ljLOVarDict = {'LOFREQ': __getLOFreq, 'NSSTATUS': __getNSStatus}
+    ljLOVarDict = {'LOFREQ': __getLOFreq, 'NSSTAT': __getNSStatus}
 
     """
         Private LO frequency setting methods. Do NOT call these methods 

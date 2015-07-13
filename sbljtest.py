@@ -267,7 +267,7 @@ TestLONoiseLabJackLOFreq Test Group Description:
     This group of tests makes sure that we can get/set the LO frequency and that 
     the settings are correct. 
     
-    Test Count: 2
+    Test Count: 3
 """
 class TestLONoiseLabJackLOFreq(unittest.TestCase):
     """
@@ -323,36 +323,48 @@ class TestLONoiseLabJackLOFreq(unittest.TestCase):
     Test - test_allLOFreqAreCorrespondinglyCorrect:
         Given that we set the LO level,
         Then, the two bits that communicate with the daughter board are set 
-            accordingly.
+            accordingly and getting the variables match our constant names.
     """
     def test_allLOFreqAreCorrespondinglyCorrect(self):
         """
             Testing 3.4GHz.
         """
         self.lj.setLOFreq(const.LOFreqConst.LO_3_4GHZ)
+        dict = self.lj.getParams(["LOFREQ"])
+        
         self.assertEqual(self.mockLabJackValues["EIO4"], 0)
         self.assertEqual(self.mockLabJackValues["EIO3"], 0)
+        self.assertEqual("LO_3_4GHZ", dict["LOFREQ"])
         
         """
             Testing 7.5GHz.
         """
         self.lj.setLOFreq(const.LOFreqConst.LO_7_5GHZ)
+        dict = self.lj.getParams(["LOFREQ"])
+        
         self.assertEqual(self.mockLabJackValues["EIO4"], 0)
         self.assertEqual(self.mockLabJackValues["EIO3"], 1)
+        self.assertEqual("LO_7_5GHZ", dict["LOFREQ"])
         
         """
             Testing 11.5GHz.
         """
         self.lj.setLOFreq(const.LOFreqConst.LO_11_5GHZ)
+        dict = self.lj.getParams(["LOFREQ"])
+        
         self.assertEqual(self.mockLabJackValues["EIO4"], 1)
         self.assertEqual(self.mockLabJackValues["EIO3"], 0)
+        self.assertEqual("LO_11_5GHZ", dict["LOFREQ"])
         
         """
             Testing 15.5GHz.
         """
         self.lj.setLOFreq(const.LOFreqConst.LO_15_5GHZ)
+        dict = self.lj.getParams(["LOFREQ"])
+        
         self.assertEqual(self.mockLabJackValues["EIO4"], 1)
         self.assertEqual(self.mockLabJackValues["EIO3"], 1)
+        self.assertEqual("LO_15_5GHZ", dict["LOFREQ"])
     
     """
     Test - test_onOffNoiseSource:
@@ -366,16 +378,26 @@ class TestLONoiseLabJackLOFreq(unittest.TestCase):
         self.lj.setNoiseSourceOff()
         self.assertEqual(self.mockLabJackValues["EIO0"], 0)
     
+    """
+    Test - test_getParamsReturnsCorrectValues:
+        Given that the LMJ library calls work, 
+        Then we can get parameters relating to both the generic and 
+            LO/Noise Source modules.
+    """
     def test_getParamsReturnsCorrectValues(self):
         dict = self.lj.getParams()
-        print dict
-    
+        
+        """
+            Check a couple default values, then check that 
+            noise source status and LO level is returned 
+            from the call.
+        """
+        self.assertEqual(dict["NAME"], "MockLabJack")
+        self.assertEqual(dict["LJTEMP"], 300)
+        self.assertEqual(dict["LOFREQ"], "LO_3_4GHZ")
+        self.assertEqual(dict["NSSTAT"], 0)
     
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
         TestLONoiseLabJackLOFreq)
     unittest.TextTestRunner(verbosity=2).run(suite)
-        
-        
-
-
