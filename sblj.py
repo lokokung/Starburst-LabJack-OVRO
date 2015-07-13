@@ -7,6 +7,7 @@
 from labjack import ljm
 import datetime
 import sbljconstants as const
+import copy
 
 """
 Class: UnknownDeviceError extends Exception
@@ -81,22 +82,6 @@ Class: StarburstLJ extends Object
                 valid LabJack module.
 """        
 class StarburstLJ(object):
-    """
-        LabJack Parameters across generic modules:
-            LJTEMP: Temperature of the CPU unit of the LabJack in Kelvin.
-            LJAIRTEMP: Temperature of the surrounding environment 
-                of the LabJack in Kelvin.
-            24V: Voltage reading of the +24V input power in volts.
-            15V: Voltage reading of the +15V input power in volts.
-            12V: Voltage reading of the +12V input power in volts.
-            5V: Voltage reading of the +5V input power in volts.
-            NEG5V: Voltage reading of the -5V input power in volts.
-            NAME: Name of LabJack device. (Can be used as identifier.)
-    """
-    ljVariables = ["LJTEMP", "LJAIRTEMP", "24V", "15V", "12V", "5V", 
-                   "NEG5V", "NAME"]
-    
-
     def __init__(self, identifier="ANY", connectionType="ETHERNET", 
                  deviceType="T7", handle=None):   
         if not isinstance(deviceType, str):
@@ -115,10 +100,25 @@ class StarburstLJ(object):
             self.connect()
         else: 
             self.handle = handle
+            
+        """
+        LabJack Parameters across generic modules:
+            LJTEMP: Temperature of the CPU unit of the LabJack in Kelvin.
+            LJAIRTEMP: Temperature of the surrounding environment 
+                of the LabJack in Kelvin.
+            24V: Voltage reading of the +24V input power in volts.
+            15V: Voltage reading of the +15V input power in volts.
+            12V: Voltage reading of the +12V input power in volts.
+            5V: Voltage reading of the +5V input power in volts.
+            NEG5V: Voltage reading of the -5V input power in volts.
+            NAME: Name of LabJack device. (Can be used as identifier.)
+        """
+        self.ljVariables = ["LJTEMP", "LJAIRTEMP", "24V", "15V", "12V", "5V", 
+                            "NEG5V", "NAME"]
     
     """
         Private getter methods to retrieve specific parameters. Do NOT use 
-        these methods without its wrapper getLJMonitorVariables since these 
+        these methods without its wrapper getParamsiables since these 
         are not error checked.
     """
     def __getLJTemp(self):
@@ -127,19 +127,19 @@ class StarburstLJ(object):
     def __getLJAirTemp(self):
         temp = ljm.eReadName(self.handle, "TEMPERATURE_AIR_K")
         return temp
-    def __24V(self):
+    def __get24V(self):
         volt = ljm.eReadName(self.handle, "AIN4") * 3
         return volt
-    def __15V(self):
+    def __get15V(self):
         volt = ljm.eReadName(self.handle, "AIN5") * 2
         return volt
-    def __12V(self):
+    def __get12V(self):
         volt = ljm.eReadName(self.handle, "AIN6") * 2
         return volt
-    def __5V(self):
+    def __get5V(self):
         volt = ljm.eReadName(self.handle, "AIN7")
         return volt
-    def __N5V(self):
+    def __getN5V(self):
         volt = ljm.eReadName(self.handle, "AIN9")
         return volt
     def __getName(self):
@@ -147,12 +147,12 @@ class StarburstLJ(object):
         return name
         
     """
-        Dictionary lookup for generic parameters (Placed here because the 
+        Dictionary lookup for parameters (Placed here because the 
         corresponding methods that are pointed to must be defined first.)
     """
     ljVarDict = {'LJTEMP': __getLJTemp, 'LJAIRTEMP': __getLJAirTemp,
-                 '24V': __24V, '15V': __15V, '12V': __12V, '5V': __5V,
-                 'NEG5V': __N5V, 'NAME': __getName}
+                 '24V': __get24V, '15V': __get15V, '12V': __get12V, 
+                 '5V': __get5V, 'NEG5V': __getN5V, 'NAME': __getName}
      
     """
     Method: connect()
@@ -191,10 +191,9 @@ class StarburstLJ(object):
             self.handle = None
     
     """
-    Method: getLJMonitorVar(variables)
+    Method: getParams(variables)
         Description: 
-            Main query to LabJack modules for generic hardware 
-            information. 
+            Main query to LabJack modules for hardware information. 
         Arguments: 
             variables: a list of keys from ljVarDict of which the 
                 corresponding parameter should be measured and returned.
@@ -204,13 +203,16 @@ class StarburstLJ(object):
         Raises:
             NoConnectionError: occurs when there is no connection to the 
                 LabJack unit.
+            KeyError occurs when designated key is non-existent.
     """
-    def getLJMonitorVar(self, variables=ljVariables):
+    def getParams(self, variables=None):
         if self.handle is not None:
             varDump = {'TIMESTAMP': str(datetime.datetime.utcnow())}
-                       
+            if variables is None:
+                variables = self.ljVariables
+            
             for var in variables:
-                varDump[var] = StarburstLJ.ljVarDict[var](self)
+                varDump[var] = self.ljVarDict[var](self)
             return varDump
         else:
             raise NoConnectionError(self.identifier)
@@ -256,11 +258,44 @@ Class: LONoiseLJ extends StarburstLJ
     Raises:
         (Same as those of StarburstLJ. Refer to the description above.)
 """        
-class LONoiseLJ(StarburstLJ):
+class LONoiseLJ(StarburstLJ):   
     def __init__(self, identifier="ANY", connectionType="ETHERNET", 
                  deviceType="T7", handle=None):
         super(LONoiseLJ, self).__init__(identifier, connectionType,
                                         deviceType, handle)
+        
+        """
+        LabJack Parameters across LO/Noise Source modules
+            LOFREQ: Current set LO setting.
+            NSSTATUS: On/Off status of noise source (0=off, 1=on).
+        """        
+        self.ljLOVariables = ["LOFREQ", "NSSTATUS"]
+        self.ljVariables.extend(self.ljLOVariables)
+        self.LOConstantNames = {value: name for name, 
+                                value in vars(const.LOFreqConst).items() 
+                                if name.isupper()}
+                                        
+    """
+        Private getter methods to retrieve specific parameters. Do NOT use 
+        these methods without its wrapper getParamsiables since these 
+        are not error checked.
+    """
+    def __getLOFreq(self):
+        rightBit = ljm.eReadName(self.handle, "EIO3")
+        leftBit = ljm.eReadName(self.handle, "EIO4")
+        
+        setting = leftBit * 2 + rightBit
+        freqName = self.LOConstantNames[setting]
+        return freqName
+    def __getNSStatus(self):
+        status = ljm.eReadName(self.handle, "EIO0")
+        return status
+        
+    """
+        Dictionary lookup for parameters (Placed here because the 
+        corresponding methods that are pointed to must be defined first.)
+    """
+    ljLOVarDict = {'LOFREQ': __getLOFreq, 'NSSTATUS': __getNSStatus}
 
     """
         Private LO frequency setting methods. Do NOT call these methods 
@@ -269,25 +304,23 @@ class LONoiseLJ(StarburstLJ):
     """
     def __setFreq(self, leftBit, rightBit):
         ljm.eWriteName(self.handle, "EIO3", rightBit)
-        ljm.eWriteName(self.handle, "EIO4", leftBit)
-    
+        ljm.eWriteName(self.handle, "EIO4", leftBit)   
     def __3_4GHZ(self):
         self.__setFreq(0, 0)
-        
     def __7_5GHZ(self):
-        self.__setFreq(0, 1)
-        
+        self.__setFreq(0, 1)  
     def __11_5GHZ(self):
         self.__setFreq(1, 0)
-        
     def __15_5GHZ(self):
         self.__setFreq(1, 1)
     
     """
         Dictionary lookup for LO settings and corresponding methods.
     """
-    ljLODict = {const.LO_3_4GHZ: __3_4GHZ, const.LO_7_5GHZ: __7_5GHZ,
-                const.LO_11_5GHZ: __11_5GHZ, const.LO_15_5GHZ: __15_5GHZ}
+    ljLODict = {const.LOFreqConst.LO_3_4GHZ: __3_4GHZ, 
+                const.LOFreqConst.LO_7_5GHZ: __7_5GHZ,
+                const.LOFreqConst.LO_11_5GHZ: __11_5GHZ, 
+                const.LOFreqConst.LO_15_5GHZ: __15_5GHZ}
     
     """
     Method: setLOFreq(freq)
@@ -335,8 +368,42 @@ class LONoiseLJ(StarburstLJ):
             NoConnectionError: occurs when there is no connection to the
                 LabJack unit.
     """
-    def set NoiseSourceOff(self):
+    def setNoiseSourceOff(self):
         if self.handle is not None:
             ljm.eWriteName(self.handle, "EIO0", 0)
+        else:
+            raise NoConnectionError(self.identifier)
+            
+    """
+    Method: getParams(variables)
+        Description: 
+            Main query to LabJack modules for hardware information. 
+        Arguments: 
+            variables: a list of keys from ljVarDict of which the 
+                corresponding parameter should be measured and returned.
+        Returns:
+            varDump: a dictionary with each element from variables as a key 
+                and the corresponding measurement as the value.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the 
+                LabJack unit.
+            KeyError occurs when designated key is non-existent.
+    """
+    def getParams(self, variables=None):
+        if self.handle is not None:
+            if variables is None:
+                variables = self.ljVariables
+                
+            cpy = copy.copy(variables)
+            varDump = {}
+        
+            for var in self.ljLOVariables:
+                if var in cpy:
+                    varDump[var] = self.ljLOVarDict[var](self)
+                    cpy.remove(var)
+                
+            varDump.update(super(LONoiseLJ, self).getParams(cpy))
+            return varDump
+            
         else:
             raise NoConnectionError(self.identifier)

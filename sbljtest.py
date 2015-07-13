@@ -10,14 +10,14 @@ import sblj
 import sbljconstants as const
 
 """
-TestGenericLabJackMonitorVars Test Group Description:
+TestGenericLabJackGetParams Test Group Description:
     This group of tests makes sure that given that the LJM library correctly
-    returns values on a LabJack with given names, that the getLJMonitorVar
+    returns values on a LabJack with given names, that the getParams
     function returns the correct output. 
     
     Test Count: 8
 """
-class TestGenericLabJackMonitorVars(unittest.TestCase):
+class TestGenericLabJackGetParams(unittest.TestCase):
     """
         Dictionary of values that the mock LabJack will return for call with 
         names corresponding to the keys of the dictionary.
@@ -59,88 +59,88 @@ class TestGenericLabJackMonitorVars(unittest.TestCase):
     """
     Test - test_temperatureOfLabJack:
         Given that the mock LabJack has a temperature of 300,
-        Then getLJMonitorVar(["LJTEMP"]) returns 300,
+        Then getParams(["LJTEMP"]) returns 300,
         And a time stamp is returned.
     """
     def test_temperatureOfLabJack(self):
-        dict = self.lj.getLJMonitorVar(["LJTEMP"])
+        dict = self.lj.getParams(["LJTEMP"])
         self.assertEqual(dict["LJTEMP"], 300)
         self.assertTrue(dict.has_key("TIMESTAMP"))
     
     """
     Test - test_temperatureOfEnvironment:
         Given that the mock LabJack environment has a temperature of 298,
-        Then getLJMonitorVar(["LJAIRTEMP"]) returns 298,
+        Then getParams(["LJAIRTEMP"]) returns 298,
         And a time stamp is returned.
     """
     def test_temperatureOfEnvironment(self):
-        dict = self.lj.getLJMonitorVar(["LJAIRTEMP"])
+        dict = self.lj.getParams(["LJAIRTEMP"])
         self.assertEqual(dict["LJAIRTEMP"], 298)
         self.assertTrue(dict.has_key("TIMESTAMP"))
     
     """
     Test - test_24V:
         Given that the AIN4 on the LabJack has a voltage of 8,
-        Then getLJMonitorVar(["24V"]) returns 24,
+        Then getParams(["24V"]) returns 24,
         And a time stamp is returned.
     """
     def test_24V(self):
-        dict = self.lj.getLJMonitorVar(["24V"])
+        dict = self.lj.getParams(["24V"])
         self.assertEqual(dict["24V"], 24)
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
     Test - test_15V:
         Given that the AIN5 on the LabJack has a voltage of 7.5,
-        Then getLJMonitorVar(["15V"]) returns 15,
+        Then getParams(["15V"]) returns 15,
         And a time stamp is returned.
     """
     def test_15V(self):
-        dict = self.lj.getLJMonitorVar(["15V"])
+        dict = self.lj.getParams(["15V"])
         self.assertEqual(dict["15V"], 15)
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
     Test - test_12V:
         Given that the AIN6 on the LabJack has a voltage of 6,
-        Then getLJMonitorVar(["12V"]) returns 12,
+        Then getParams(["12V"]) returns 12,
         And a time stamp is returned.
     """
     def test_12V(self):
-        dict = self.lj.getLJMonitorVar(["12V"])
+        dict = self.lj.getParams(["12V"])
         self.assertEqual(dict["12V"], 12)
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
     Test - test_5V:
         Given that the AIN7 on the LabJack has a voltage of 5,
-        Then getLJMonitorVar(["5V"]) returns 5,
+        Then getParams(["5V"]) returns 5,
         And a time stamp is returned.
     """
     def test_5V(self):
-        dict = self.lj.getLJMonitorVar(["5V"])
+        dict = self.lj.getParams(["5V"])
         self.assertEqual(dict["5V"], 5)
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
     Test - test_neg5V:
         Given that the AIN9 on the LabJack has a voltage of -5,
-        Then getLJMonitorVar(["NEG5V"]) returns -5,
+        Then getParams(["NEG5V"]) returns -5,
         And a time stamp is returned.
     """
     def test_neg5V(self):
-        dict = self.lj.getLJMonitorVar(["NEG5V"])
+        dict = self.lj.getParams(["NEG5V"])
         self.assertEqual(dict["NEG5V"], -5)
         self.assertTrue(dict.has_key("TIMESTAMP"))
 
     """
     Test - test_name:
         Given that the LabJack's name is "MockLabJack",
-        Then getLJMonitorVar(["NAME"]) returns "MockLabJack",
+        Then getParams(["NAME"]) returns "MockLabJack",
         And a time stamp is returned.
     """
     def test_name(self):
-        dict = self.lj.getLJMonitorVar(["NAME"])
+        dict = self.lj.getParams(["NAME"])
         self.assertEqual(dict["NAME"], "MockLabJack")
         self.assertTrue(dict.has_key("TIMESTAMP"))
     
@@ -172,7 +172,7 @@ class TestGenericLabJackConnections(unittest.TestCase):
         lj = sblj.StarburstLJ("","","","FAKE")
         lj.disconnect()
         self.assertRaises(sblj.NoConnectionError, 
-                          lj.getLJMonitorVar)
+                          lj.getParams)
                           
     """
     Test - test_throwExceptionWhenInvalidParam:
@@ -225,12 +225,12 @@ class TestGenericLabJackName(unittest.TestCase):
         Then the change is reflected when we check it.
     """
     def test_writeNameToLabJack(self):
-        dict = self.lj.getLJMonitorVar(["NAME"])
+        dict = self.lj.getParams(["NAME"])
         self.assertEqual(dict["NAME"], "MockLabJack")
         
         self.lj.setLJName("NewName")
         
-        dict = self.lj.getLJMonitorVar(["NAME"])
+        dict = self.lj.getParams(["NAME"])
         self.assertEqual(dict["NAME"], "NewName")
         
     """
@@ -267,7 +267,7 @@ TestLONoiseLabJackLOFreq Test Group Description:
     This group of tests makes sure that we can get/set the LO frequency and that 
     the settings are correct. 
     
-    Test Count: 1
+    Test Count: 2
 """
 class TestLONoiseLabJackLOFreq(unittest.TestCase):
     """
@@ -276,23 +276,48 @@ class TestLONoiseLabJackLOFreq(unittest.TestCase):
         in the tearDown to allow for running of individual test cases in 
         this group.
     """
+    def eReadName(self, handle, name):
+        return self.mockLabJackValues[name]
+        
+    def eReadNameString(self, handle, name):
+        return self.mockLabJackValues[name]
+        
     def eWriteName(self, handle, name, newVal):
-        if(name is "EIO3"):
-            self.rightBit = newVal
-        else:
-            self.leftBit = newVal
+        self.mockLabJackValues[name] = newVal
+        
+    def eWriteNameString(self, handle, name, newVal):
+        self.mockLabJackValues[name] = newVal
     
     def setUp(self):
-        self.leftBit = 0
-        self.rightBit = 0
+        self.mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
+                                  'TEMPERATURE_AIR_K': 298,
+                                  'AIN4': 8,
+                                  'AIN5': 7.5,
+                                  'AIN6': 6,
+                                  'AIN7': 5,
+                                  'AIN9': -5,
+                                  'EIO0': 0,
+                                  'EIO3': 0,
+                                  'EIO4': 0,
+                                  'DEVICE_NAME_DEFAULT': 'MockLabJack'}
+        
         self.lj = sblj.LONoiseLJ("","","","MOCK")
         
+        self.o_eReadName = ljm.eReadName
+        self.o_eReadNameString = ljm.eReadNameString
         self.o_eWriteName = ljm.eWriteName
+        self.o_eWriteNameString = ljm.eWriteNameString
         
+        ljm.eReadName = self.eReadName
+        ljm.eReadNameString = self.eReadNameString
         ljm.eWriteName = self.eWriteName
+        ljm.eWriteNameString = self.eWriteNameString
         
     def tearDown(self):
+        ljm.eReadName = self.o_eReadName
+        ljm.eReadNameString = self.o_eReadNameString
         ljm.eWriteName = self.o_eWriteName
+        ljm.eWriteNameString = self.o_eWriteNameString
     
     """
     Test - test_allLOFreqAreCorrespondinglyCorrect:
@@ -304,31 +329,47 @@ class TestLONoiseLabJackLOFreq(unittest.TestCase):
         """
             Testing 3.4GHz.
         """
-        self.lj.setLOFreq(const.LO_3_4GHZ)
-        self.assertEqual(self.leftBit, 0)
-        self.assertEqual(self.rightBit, 0)
+        self.lj.setLOFreq(const.LOFreqConst.LO_3_4GHZ)
+        self.assertEqual(self.mockLabJackValues["EIO4"], 0)
+        self.assertEqual(self.mockLabJackValues["EIO3"], 0)
         
         """
             Testing 7.5GHz.
         """
-        self.lj.setLOFreq(const.LO_7_5GHZ)
-        self.assertEqual(self.leftBit, 0)
-        self.assertEqual(self.rightBit, 1)
+        self.lj.setLOFreq(const.LOFreqConst.LO_7_5GHZ)
+        self.assertEqual(self.mockLabJackValues["EIO4"], 0)
+        self.assertEqual(self.mockLabJackValues["EIO3"], 1)
         
         """
             Testing 11.5GHz.
         """
-        self.lj.setLOFreq(const.LO_11_5GHZ)
-        self.assertEqual(self.leftBit, 1)
-        self.assertEqual(self.rightBit, 0)
+        self.lj.setLOFreq(const.LOFreqConst.LO_11_5GHZ)
+        self.assertEqual(self.mockLabJackValues["EIO4"], 1)
+        self.assertEqual(self.mockLabJackValues["EIO3"], 0)
         
         """
             Testing 15.5GHz.
         """
-        self.lj.setLOFreq(const.LO_15_5GHZ)
-        self.assertEqual(self.leftBit, 1)
-        self.assertEqual(self.rightBit, 1)
-
+        self.lj.setLOFreq(const.LOFreqConst.LO_15_5GHZ)
+        self.assertEqual(self.mockLabJackValues["EIO4"], 1)
+        self.assertEqual(self.mockLabJackValues["EIO3"], 1)
+    
+    """
+    Test - test_onOffNoiseSource:
+        Given that we turn on/off the noise source, 
+        Then the corresponding register is changed accordingly
+    """
+    def test_onOffNoiseSource(self):
+        self.lj.setNoiseSourceOn()
+        self.assertEqual(self.mockLabJackValues["EIO0"], 1)
+        
+        self.lj.setNoiseSourceOff()
+        self.assertEqual(self.mockLabJackValues["EIO0"], 0)
+    
+    def test_getParamsReturnsCorrectValues(self):
+        dict = self.lj.getParams()
+        print dict
+    
     
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
