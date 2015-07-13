@@ -110,11 +110,12 @@ class StarburstLJ(object):
             15V: Voltage reading of the +15V input power in volts.
             12V: Voltage reading of the +12V input power in volts.
             5V: Voltage reading of the +5V input power in volts.
+            S5V: Voltage reading of switched +5V input power in volts.
             NEG5V: Voltage reading of the -5V input power in volts.
             NAME: Name of LabJack device. (Can be used as identifier.)
         """
         self.ljVariables = ["LJTEMP", "LJAIRTEMP", "24V", "15V", "12V", "5V", 
-                            "NEG5V", "NAME"]
+                            "NEG5V", "NAME", "S5V"]
     
     """
         Private getter methods to retrieve specific parameters. Do NOT use 
@@ -145,6 +146,9 @@ class StarburstLJ(object):
     def __getName(self):
         name = ljm.eReadNameString(self.handle, "DEVICE_NAME_DEFAULT")
         return name
+    def __getS5V(self):
+        volt = ljm.eReadName(self.handle, "AIN8")
+        return volt
         
     """
         Dictionary lookup for parameters (Placed here because the 
@@ -152,7 +156,8 @@ class StarburstLJ(object):
     """
     ljVarDict = {'LJTEMP': __getLJTemp, 'LJAIRTEMP': __getLJAirTemp,
                  '24V': __get24V, '15V': __get15V, '12V': __get12V, 
-                 '5V': __get5V, 'NEG5V': __getN5V, 'NAME': __getName}
+                 '5V': __get5V, 'NEG5V': __getN5V, 'NAME': __getName,
+                 'S5V': __getS5V}
      
     """
     Method: connect()
@@ -407,3 +412,93 @@ class LONoiseLJ(StarburstLJ):
             
         else:
             raise NoConnectionError(self.identifier)
+            
+
+"""
+Class: AntennaLJ extends StarburstLJ
+    Description:
+        Custom object that represents a Antenna LabJack control unit
+        used in the Starburst project.
+    Arguments:
+        (Same as those of StarburstLJ. Refer to the description above.)
+    Raises:
+        (Same as those of StarburstLJ. Refer to the description above.)
+"""            
+class AntennaLJ(StarburstLJ):
+    def __init__(self, identifier="ANY", connectionType="ETHERNET", 
+                 deviceType="T7", handle=None):
+        super(LONoiseLJ, self).__init__(identifier, connectionType,
+                                        deviceType, handle)
+        
+        """
+        LabJack Parameters across Antenna modules
+            VQPOW: IF Power to the Q component of the Vertical polarization.
+            VIPOW: IF Power to the I component of the Vertical polarization.
+            HQPOW: IF Power to the Q component of the Horizontal polarization.
+            HIPOW: IF Power to the I component of the Horizontal polarization.
+            VQTEMP: Temperature of Q component of the Vertical polarization.
+            VITEMP: Temperature of I component of the Vertical polarization.
+            HQTEMP: Temperature of Q component of the Horizontal polarization.
+            HITEMP: Temperature of I component of the Horizontal polarization.
+            VQATTEN: Attenuation settings for the Q of Vertical polarization.
+            VIATTEN: Attenuation settings for the I of Vertical polarization.
+            HQATTEN: Attenuation settings for the Q of Horizontal polarization.
+            HIATTEN: Attenuation settings for the I of Horizontal polarization.
+            VNSSEL: Noise source selection for Vertical polarization 
+                (0=antenna, 1=noise source).
+            HNSSEL: Noise source selection for Horizontal polarization 
+                (0=antenna, 1=noise source).
+            
+        """        
+        self.ljAVariables = ["VQPOW", "VIPOW", "HQPOW", "HIPOW",
+                             "VQTEMP", "VITEMP", "HQTEMP", "HITEMP",
+                             "VQATTEN", "VIATTEN", "HQATTEN", "HIATTEN",
+                             "VNSSEL", "HNSSEL"]
+        self.ljVariables.extend(self.ljAVariables)
+        
+        """
+        Ghost copy of attenuations for each component
+        """
+        self.vqAtt = 31.5
+        self.viAtt = 31.5
+        self.hqAtt = 31.5
+        self.hiAtt = 31.5
+        
+    """
+        Private getter methods to retrieve specific parameters. Do NOT use 
+        these methods without its wrapper getParamsiables since these 
+        are not error checked.
+    """
+    def __getVQPow(self):
+        pow = ljm.eReadName(self.handle, "AIN3")
+        return pow
+    def __getVIPow(self):
+        pow = ljm.eReadName(self.handle, "AIN2")
+        return pow
+    def __getHQPow(self):
+        pow = ljm.eReadName(self.handle, "AIN1")
+        return pow
+    def __getHIPow(self):
+        pow = ljm.eReadName(self.handle, "AIN0")
+        return pow
+    def __getVQTemp(self):
+        temp = ljm.eReadName(self.handle, "AIN13")
+    def __getVITemp(self):
+        temp = ljm.eReadName(self.handle, "AIN12")
+    def __getHQTemp(self):
+        temp = ljm.eReadName(self.handle, "AIN11")
+    def __getHITemp(self):
+        temp = ljm.eReadName(self.handle, "AIN10")
+    def __getVQAtt(self):
+        return self.vqAtt
+    def __getVIAtt(self):
+        return self.viAtt
+    def __getHQAtt(self):
+        return self.hqAtt
+    def __getHIAtt(self):
+        return self.hiAtt
+    def __getVNoiseSel(self):
+        sel = ljm.eReadName(self.handle, "EIO2")
+    def __getHNoiseSel(self):
+        sel = ljm.eReadName(self.handle, "EIO1")
+    

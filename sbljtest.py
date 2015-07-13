@@ -15,7 +15,7 @@ TestGenericLabJackGetParams Test Group Description:
     returns values on a LabJack with given names, that the getParams
     function returns the correct output. 
     
-    Test Count: 8
+    Test Count: 9
 """
 class TestGenericLabJackGetParams(unittest.TestCase):
     """
@@ -28,6 +28,7 @@ class TestGenericLabJackGetParams(unittest.TestCase):
                          'AIN5': 7.5,
                          'AIN6': 6,
                          'AIN7': 5,
+                         'AIN8': 5,
                          'AIN9': -5,
                          'DEVICE_NAME_DEFAULT': 'MockLabJack'}
     
@@ -144,6 +145,16 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         self.assertEqual(dict["NAME"], "MockLabJack")
         self.assertTrue(dict.has_key("TIMESTAMP"))
     
+    """
+    Test - test_s5V:
+        Given that the AIN8 on the LabJack has a voltage of 5,
+        Then getParams(["S5V"]) returns 5,
+        And a time stamp is returned.
+    """
+    def test_s5V(self):
+        dict = self.lj.getParams(["S5V"])
+        self.assertEqual(dict["S5V"], 5)
+        self.assertTrue(dict.has_key("TIMESTAMP"))
     
 """
 TestGenericLabJackConnections Test Group Description:
@@ -397,7 +408,21 @@ class TestLONoiseLabJackLOFreq(unittest.TestCase):
         self.assertEqual(dict["LOFREQ"], "LO_3_4GHZ")
         self.assertEqual(dict["NSSTAT"], 0)
     
+    """
+    Test - test_throwExceptionWhenDisconnectOrInvalid:
+        Given that we call getParams with an invalid key,
+        Then a KeyError is raised.
+        
+        Given that we are not connected to a LabJack module,
+        Then when we call getParams, a NoConnectionError is raised.
+    """
+    def test_throwExceptionWhenDisconnectOrInvalid(self):
+        self.assertRaises(KeyError, self.lj.getParams, ["FAKEKEY"])
+        
+        self.lj.disconnect()
+        self.assertRaises(sblj.NoConnectionError, self.lj.getParams)
+    
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestLONoiseLabJackLOFreq)
+        TestGenericLabJackGetParams)
     unittest.TextTestRunner(verbosity=2).run(suite)
