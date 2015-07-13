@@ -483,12 +483,16 @@ class AntennaLJ(StarburstLJ):
         return pow
     def __getVQTemp(self):
         temp = ljm.eReadName(self.handle, "AIN13")
+        return temp
     def __getVITemp(self):
         temp = ljm.eReadName(self.handle, "AIN12")
+        return temp
     def __getHQTemp(self):
         temp = ljm.eReadName(self.handle, "AIN11")
+        return temp
     def __getHITemp(self):
         temp = ljm.eReadName(self.handle, "AIN10")
+        return temp
     def __getVQAtt(self):
         return self.vqAtt
     def __getVIAtt(self):
@@ -499,6 +503,8 @@ class AntennaLJ(StarburstLJ):
         return self.hiAtt
     def __getVNoiseSel(self):
         sel = ljm.eReadName(self.handle, "EIO2")
+        return sel
     def __getHNoiseSel(self):
         sel = ljm.eReadName(self.handle, "EIO1")
+        return sel
     
