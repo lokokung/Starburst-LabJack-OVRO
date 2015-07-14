@@ -7,9 +7,8 @@
 import unittest
 from labjack import ljm
 import sblj
-import sbljconstants as const
-
-
+import sys
+    
 """
 TestGenericLabJackGetParams Test Group Description:
     This group of tests makes sure that given that the LJM library correctly
@@ -604,6 +603,11 @@ class TestAntennaLabJackModule(unittest.TestCase):
         
     
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestAntennaLabJackModule)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    testGroups = [TestGenericLabJackGetParams, TestGenericLabJackConnections,
+                  TestGenericLabJackName, TestLONoiseLabJackModule,
+                  TestAntennaLabJackModule]
+    for tG in testGroups:
+        print "\nTesting: " + str(tG.__name__)
+        suite = unittest.TestLoader().loadTestsFromTestCase(
+            tG)
+        unittest.TextTestRunner(verbosity=2).run(suite)

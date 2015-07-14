@@ -119,12 +119,12 @@ class StarburstLJ(object):
             LJTEMP: Temperature of the CPU unit of the LabJack in Kelvin.
             LJAIRTEMP: Temperature of the surrounding environment 
                 of the LabJack in Kelvin.
-            24V: Voltage reading of the +24V input power in volts.
-            15V: Voltage reading of the +15V input power in volts.
-            12V: Voltage reading of the +12V input power in volts.
-            5V: Voltage reading of the +5V input power in volts.
-            S5V: Voltage reading of switched +5V input power in volts.
-            NEG5V: Voltage reading of the -5V input power in volts.
+            POW_24V: Voltage reading of the +24V input power in volts.
+            POW_15V: Voltage reading of the +15V input power in volts.
+            POW_12V: Voltage reading of the +12V input power in volts.
+            POW_5V: Voltage reading of the +5V input power in volts.
+            POW_S5V: Voltage reading of switched +5V input power in volts.
+            POW_N5V: Voltage reading of the -5V input power in volts.
             NAME: Name of LabJack device. (Can be used as identifier.)
         """
         self.ljVariables = ["LJTEMP", "LJAIRTEMP", "POW_24V", "POW_15V", 
@@ -659,9 +659,9 @@ class AntennaLJ(StarburstLJ):
             KeyError occurs when designated attenuator is non-existent.
             
     """
-    def setAttenuator(self, val, list=["VQ","VI","HQ","HI"]):
+    def setAttenuator(self, level, list=["VQ","VI","HQ","HI"]):
         if self.handle is not None:
-            newVal = self.__setUpAttenuations(val)
+            newVal = self.__setUpAttenuations(level)
                            
             for input in list:
                 self.attDict[input](self, newVal)
