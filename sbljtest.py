@@ -431,7 +431,7 @@ TestAntennaLabJackModule Test Group Description:
     This group of tests makes sure that the methods for the AntennaLJ
     work properly.
     
-    Test Count: 3
+    Test Count: 4
 """    
 class TestAntennaLabJackModule(unittest.TestCase):
     """
@@ -565,6 +565,28 @@ class TestAntennaLabJackModule(unittest.TestCase):
         self.lj.setAttenuator(0.5, ["VI"])
         dict = self.lj.getParams()
         self.assertEqual(dict["VIATTEN"], 0.5)
+    
+    """
+    Test - test_rfNoiseSourceSelection:
+        Given that we change to either RF or Noise Source,
+        Then this is reflected in the pin-out values on the LabJacks.
+    """
+    def test_rfNoiseSourceSelection(self):
+        """
+            Select noise source.
+        """
+        self.lj.selectNoiseSource()
+        dict = self.lj.getParams()
+        self.assertEqual(dict["VNSSEL"], 1)
+        self.assertEqual(dict["HNSSEL"], 1)
+        
+        """
+            Select RF source.
+        """
+        self.lj.selectRFSource()
+        dict = self.lj.getParams()
+        self.assertEqual(dict["VNSSEL"], 0)
+        self.assertEqual(dict["HNSSEL"], 0)
     
     """
     Test - test_throwExceptionWhenDisconnectOrInvalid:
