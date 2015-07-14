@@ -8,6 +8,7 @@ from labjack import ljm
 import datetime
 import sbljconstants as const
 import copy
+import math
 
 """
 Class: UnknownDeviceError extends Exception
@@ -427,23 +428,35 @@ Class: AntennaLJ extends StarburstLJ
 class AntennaLJ(StarburstLJ):
     def __init__(self, identifier="ANY", connectionType="ETHERNET", 
                  deviceType="T7", handle=None):
-        super(LONoiseLJ, self).__init__(identifier, connectionType,
+        super(AntennaLJ, self).__init__(identifier, connectionType,
                                         deviceType, handle)
         
         """
         LabJack Parameters across Antenna modules
-            VQPOW: IF Power to the Q component of the Vertical polarization.
-            VIPOW: IF Power to the I component of the Vertical polarization.
-            HQPOW: IF Power to the Q component of the Horizontal polarization.
-            HIPOW: IF Power to the I component of the Horizontal polarization.
-            VQTEMP: Temperature of Q component of the Vertical polarization.
-            VITEMP: Temperature of I component of the Vertical polarization.
-            HQTEMP: Temperature of Q component of the Horizontal polarization.
-            HITEMP: Temperature of I component of the Horizontal polarization.
-            VQATTEN: Attenuation settings for the Q of Vertical polarization.
-            VIATTEN: Attenuation settings for the I of Vertical polarization.
-            HQATTEN: Attenuation settings for the Q of Horizontal polarization.
-            HIATTEN: Attenuation settings for the I of Horizontal polarization.
+            VQPOW: IF Power to the Q component of the Vertical polarization 
+                given in dBm.
+            VIPOW: IF Power to the I component of the Vertical polarization
+                given in dBm.
+            HQPOW: IF Power to the Q component of the Horizontal polarization
+                given in dBm.
+            HIPOW: IF Power to the I component of the Horizontal polarization
+                given in dBm.
+            VQTEMP: Temperature of Q component of the Vertical polarization
+                given in degrees Celsius.
+            VITEMP: Temperature of I component of the Vertical polarization
+                given in degrees Celsius.
+            HQTEMP: Temperature of Q component of the Horizontal polarization
+                given in degrees Celsius.
+            HITEMP: Temperature of I component of the Horizontal polarization
+                given in degrees Celsius.
+            VQATTEN: Attenuation settings for the Q of Vertical polarization
+                given in dB.
+            VIATTEN: Attenuation settings for the I of Vertical polarization
+                given in dB.
+            HQATTEN: Attenuation settings for the Q of Horizontal polarization
+                given in dB.
+            HIATTEN: Attenuation settings for the I of Horizontal polarization
+                given in dB.
             VNSSEL: Noise source selection for Vertical polarization 
                 (0=antenna, 1=noise source).
             HNSSEL: Noise source selection for Horizontal polarization 
@@ -465,33 +478,92 @@ class AntennaLJ(StarburstLJ):
         self.hiAtt = 31.5
         
     """
+        Private attenuator methods. Do NOT call these methods directly, 
+        instead, use the setAttenuator methods to do so. (These methods
+        are not error checked.)
+    """
+    def __setUpAttenuations(self, val):
+        attDict = {1: "FIO1", 2: "FIO2", 3: "FIO3", 4: "FIO4", 5: "FIO5"}
+        
+        if val > 31:
+            newVal = 63
+        else:
+            newVal = math.ceil(val * 2)
+            
+        temp = newVal / 2
+            
+        if newVal % 2 == 1:
+            ljm.eWriteName(self.handle, "FIO0", 1)
+            newVal = (newVal - 1) / 2
+        
+        for i in range(1, 6):
+            ljm.eWriteName(self.handle, attDict[i], newVal % 2)
+            newVal /= 2
+            
+        return temp
+            
+    def __turnOffAllLatches(self):
+        ljm.eWriteName(self.handle, "CIO0", 0)
+        ljm.eWriteName(self.handle, "CIO1", 0)
+        ljm.eWriteName(self.handle, "CIO2", 0)
+        ljm.eWriteName(self.handle, "CIO3", 0)
+    def __VQAttenLatch(self):
+        ljm.eWriteName(self.handle, "CIO0", 1)
+        __turnOffAllLatches()
+    def __VIAttenLatch(self):
+        ljm.eWriteName(self.handle, "CIO1", 1)
+        __turnOffAllLatches()
+    def __HQAttenLatch(self):
+        ljm.eWriteName(self.handle, "CIO2", 1)
+        __turnOffAllLatches()
+    def __HIAttenLatch(self):
+        ljm.eWriteName(self.handle, "CIO3", 1)
+        __turnOffAllLatches()
+        
+    """
+        Dictionary for attenuator method setups.
+    """
+    attDict = {'VQ': __VQAttenLatch, 
+               'VI': __VIAttenLatch,  
+               'HQ': __HQAttenLatch, 
+               'HI': __HIAttenLatch}
+        
+    """
         Private getter methods to retrieve specific parameters. Do NOT use 
         these methods without its wrapper getParamsiables since these 
         are not error checked.
     """
     def __getVQPow(self):
         pow = ljm.eReadName(self.handle, "AIN3")
+        pow = 24 - 40 * pow
         return pow
     def __getVIPow(self):
         pow = ljm.eReadName(self.handle, "AIN2")
+        pow = 24 - 40 * pow
         return pow
     def __getHQPow(self):
         pow = ljm.eReadName(self.handle, "AIN1")
+        pow = 24 - 40 * pow
         return pow
     def __getHIPow(self):
         pow = ljm.eReadName(self.handle, "AIN0")
+        pow = 24 - 40 * pow
         return pow
     def __getVQTemp(self):
         temp = ljm.eReadName(self.handle, "AIN13")
+        temp = 478 * temp - 267
         return temp
     def __getVITemp(self):
         temp = ljm.eReadName(self.handle, "AIN12")
+        temp = 478 * temp - 267
         return temp
     def __getHQTemp(self):
         temp = ljm.eReadName(self.handle, "AIN11")
+        temp = 478 * temp - 267
         return temp
     def __getHITemp(self):
         temp = ljm.eReadName(self.handle, "AIN10")
+        temp = 478 * temp - 267
         return temp
     def __getVQAtt(self):
         return self.vqAtt
@@ -507,4 +579,79 @@ class AntennaLJ(StarburstLJ):
     def __getHNoiseSel(self):
         sel = ljm.eReadName(self.handle, "EIO1")
         return sel
+        
+    """
+        Dictionary lookup for parameters (Placed here because the 
+        corresponding methods that are pointed to must be defined first.)
+    """
+    ljAVarDict = {'VQPOW': __getVQPow, 'VIPOW': __getVIPow, 
+                  'HQPOW': __getHQPow, 'HIPOW': __getHIPow,
+                  'VQTEMP': __getVQTemp, 'VITEMP': __getVITemp,
+                  'HQTEMP': __getHQTemp, 'HITEMP': __getHITemp,
+                  'VQATTEN': __getVQAtt, 'VIATTEN': __getVIAtt,
+                  'HQATTEN': __getHQAtt, 'HIATTEN': __getHIAtt,
+                  'VNSSEL': __getVNoiseSel, 'HNSSEL': __getHNoiseSel}
     
+    """
+    Method: getParams(variables)
+        Description: 
+            Main query to LabJack modules for hardware information. 
+        Arguments: 
+            variables: a list of keys from ljVarDict of which the 
+                corresponding parameter should be measured and returned.
+        Returns:
+            varDump: a dictionary with each element from variables as a key 
+                and the corresponding measurement as the value.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the 
+                LabJack unit.
+            KeyError occurs when designated key is non-existent.
+    """
+    def getParams(self, variables=None):
+        if self.handle is not None:
+            if variables is None:
+                variables = self.ljVariables
+                
+            cpy = copy.copy(variables)
+            varDump = {}
+        
+            for var in self.ljAVariables:
+                if var in cpy:
+                    varDump[var] = self.ljAVarDict[var](self)
+                    cpy.remove(var)
+                
+            varDump.update(super(AntennaLJ, self).getParams(cpy))
+            return varDump
+            
+        else:
+            raise NoConnectionError(self.identifier)
+    
+    """
+    Method setAttenuator(val, list)
+        Description:
+            Sets attenuators to the smallest 0.5 increment larger than val.
+                This is capped at 31.5dB due to hardware.
+        Arguments:
+            val: value to set attenuators to.
+            list: list of which attenuators to set.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the 
+                LabJack unit.
+            KeyError occurs when designated attenuator is non-existent.
+            
+    """
+    def setAttenuator(self, val, list=["VQ","VI","HQ","HI"]):
+        if self.handle is not None:
+            newVal = __setUpAttenuations(val)
+            lookupTable = {'VQ': self.vqAtt,
+                           'VI': self.viAtt,
+                           'HQ': self.hqAtt,
+                           'HI': self.hiAtt}
+                           
+            for input in list:
+                self.attDict[input](self)
+                lookupTable[input] = newVal
+                
+        else:
+            raise NoConnectionError(self.identifier)
+            

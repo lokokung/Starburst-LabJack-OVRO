@@ -274,13 +274,13 @@ class TestGenericLabJackName(unittest.TestCase):
     
 
 """
-TestLONoiseLabJackLOFreq Test Group Description:
-    This group of tests makes sure that we can get/set the LO frequency and that 
-    the settings are correct. 
+TestLONoiseLabJackModule Test Group Description:
+    This group of tests makes sure that we can get/set the LO frequency 
+    and that the settings are correct. 
     
     Test Count: 3
 """
-class TestLONoiseLabJackLOFreq(unittest.TestCase):
+class TestLONoiseLabJackModule(unittest.TestCase):
     """
         Monkey patching methods for LJM Library in order to unit test 
         effectively. The new method is injected in the setUp and removed 
@@ -306,6 +306,7 @@ class TestLONoiseLabJackLOFreq(unittest.TestCase):
                                   'AIN5': 7.5,
                                   'AIN6': 6,
                                   'AIN7': 5,
+                                  'AIN8': 5,
                                   'AIN9': -5,
                                   'EIO0': 0,
                                   'EIO3': 0,
@@ -405,6 +406,7 @@ class TestLONoiseLabJackLOFreq(unittest.TestCase):
         """
         self.assertEqual(dict["NAME"], "MockLabJack")
         self.assertEqual(dict["LJTEMP"], 300)
+        
         self.assertEqual(dict["LOFREQ"], "LO_3_4GHZ")
         self.assertEqual(dict["NSSTAT"], 0)
     
@@ -422,7 +424,101 @@ class TestLONoiseLabJackLOFreq(unittest.TestCase):
         self.lj.disconnect()
         self.assertRaises(sblj.NoConnectionError, self.lj.getParams)
     
+
+"""
+TestAntennaLabJackModule Test Group Description:
+    This group of tests makes sure that the methods for the AntennaLJ
+    work properly.
+    
+    Test Count: 
+"""    
+class TestAntennaLabJackModule(unittest.TestCase):
+    """
+        Monkey patching methods for LJM Library in order to unit test 
+        effectively. The new method is injected in the setUp and removed 
+        in the tearDown to allow for running of individual test cases in 
+        this group.
+    """
+    def eReadName(self, handle, name):
+        return self.mockLabJackValues[name]
+        
+    def eReadNameString(self, handle, name):
+        return self.mockLabJackValues[name]
+        
+    def eWriteName(self, handle, name, newVal):
+        self.mockLabJackValues[name] = newVal
+        
+    def eWriteNameString(self, handle, name, newVal):
+        self.mockLabJackValues[name] = newVal
+    
+    def setUp(self):
+        self.mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
+                                  'TEMPERATURE_AIR_K': 298,
+                                  'AIN0': 1.2,
+                                  'AIN1': 1.2,
+                                  'AIN2': 1.2,
+                                  'AIN3': 1.2,
+                                  'AIN4': 8,
+                                  'AIN5': 7.5,
+                                  'AIN6': 6,
+                                  'AIN7': 5,
+                                  'AIN8': 5,
+                                  'AIN9': -5,
+                                  'AIN10': 1,
+                                  'AIN11': 1,
+                                  'AIN12': 1,
+                                  'AIN13': 1,
+                                  'EIO1': 0,
+                                  'EIO2': 0,
+                                  "CIO0": 0,
+                                  "CIO1": 0,
+                                  "CIO2": 0,
+                                  "CIO3": 0,
+                                  "FIO0": 1,
+                                  "FIO1": 1,
+                                  "FIO2": 1,
+                                  "FIO3": 1,
+                                  "FIO4": 1,
+                                  "FIO5": 1,
+                                  'DEVICE_NAME_DEFAULT': 'MockLabJack'}
+        
+        self.lj = sblj.AntennaLJ("","","","MOCK")
+        
+        self.o_eReadName = ljm.eReadName
+        self.o_eReadNameString = ljm.eReadNameString
+        self.o_eWriteName = ljm.eWriteName
+        self.o_eWriteNameString = ljm.eWriteNameString
+        
+        ljm.eReadName = self.eReadName
+        ljm.eReadNameString = self.eReadNameString
+        ljm.eWriteName = self.eWriteName
+        ljm.eWriteNameString = self.eWriteNameString
+        
+    def tearDown(self):
+        ljm.eReadName = self.o_eReadName
+        ljm.eReadNameString = self.o_eReadNameString
+        ljm.eWriteName = self.o_eWriteName
+        ljm.eWriteNameString = self.o_eWriteNameString
+        
+    def test_getParamsReturnsCorrectValues(self):
+        dict = self.lj.getParams()
+        
+        self.assertEqual(dict["NAME"], "MockLabJack")
+        self.assertEqual(dict["LJTEMP"], 300)
+        
+        self.assertEqual(dict["HIPOW"], -24)
+        self.assertEqual(dict["HQPOW"], -24)
+        self.assertEqual(dict["VIPOW"], -24)
+        self.assertEqual(dict["VQPOW"], -24)
+        self.assertEqual(dict["HITEMP"], 211)
+        self.assertEqual(dict["HQTEMP"], 211)
+        self.assertEqual(dict["VITEMP"], 211)
+        self.assertEqual(dict["VQTEMP"], 211)
+        self.assertEqual(dict["VNSSEL"], 0)
+        self.assertEqual(dict["HNSSEL"], 0)
+        
+    
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestGenericLabJackGetParams)
+        TestAntennaLabJackModule)
     unittest.TextTestRunner(verbosity=2).run(suite)
