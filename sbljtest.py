@@ -9,6 +9,7 @@ from labjack import ljm
 import sblj
 import sbljconstants as const
 
+
 """
 TestGenericLabJackGetParams Test Group Description:
     This group of tests makes sure that given that the LJM library correctly
@@ -430,7 +431,7 @@ TestAntennaLabJackModule Test Group Description:
     This group of tests makes sure that the methods for the AntennaLJ
     work properly.
     
-    Test Count: 
+    Test Count: 3
 """    
 class TestAntennaLabJackModule(unittest.TestCase):
     """
@@ -482,8 +483,6 @@ class TestAntennaLabJackModule(unittest.TestCase):
                                   "FIO5": 1,
                                   'DEVICE_NAME_DEFAULT': 'MockLabJack'}
         
-        self.lj = sblj.AntennaLJ("","","","MOCK")
-        
         self.o_eReadName = ljm.eReadName
         self.o_eReadNameString = ljm.eReadNameString
         self.o_eWriteName = ljm.eWriteName
@@ -494,12 +493,20 @@ class TestAntennaLabJackModule(unittest.TestCase):
         ljm.eWriteName = self.eWriteName
         ljm.eWriteNameString = self.eWriteNameString
         
+        self.lj = sblj.AntennaLJ("","","","MOCK")
+        
     def tearDown(self):
         ljm.eReadName = self.o_eReadName
         ljm.eReadNameString = self.o_eReadNameString
         ljm.eWriteName = self.o_eWriteName
         ljm.eWriteNameString = self.o_eWriteNameString
-        
+    
+    """
+    Test - test_getParamsReturnsCorrectValues:
+        Given that the LMJ library calls work, 
+        Then we can get parameters relating to both the generic and 
+            AntennaLJ modules.
+    """
     def test_getParamsReturnsCorrectValues(self):
         dict = self.lj.getParams()
         
@@ -516,6 +523,62 @@ class TestAntennaLabJackModule(unittest.TestCase):
         self.assertEqual(dict["VQTEMP"], 211)
         self.assertEqual(dict["VNSSEL"], 0)
         self.assertEqual(dict["HNSSEL"], 0)
+        self.assertEqual(dict["HIATTEN"], 31.5)
+        self.assertEqual(dict["HQATTEN"], 31.5)
+        self.assertEqual(dict["VIATTEN"], 31.5)
+        self.assertEqual(dict["VQATTEN"], 31.5)
+        
+        for i in range(0, 6):
+            self.assertEqual(self.mockLabJackValues["FIO" + str(i)], 1)
+    
+    """
+    Test - test_setAttenuatorSetsValueCorrectly:
+        Given that we set the attenuators to certain values,
+        Then the attenuators should be set to the first 0.5 increment 
+            larger than the given value if the value is less than 31.5
+    """
+    def test_setAttenuatorSetsValueCorrectly(self):
+        """
+            Check that we are always rounding up.
+        """
+        self.lj.setAttenuator(10.01, ["VQ"])
+        dict = self.lj.getParams()
+        self.assertEqual(dict["VQATTEN"], 10.5)
+        
+        """
+            Check that we do not round if not necessary.
+        """
+        self.lj.setAttenuator(9, ["HQ"])
+        dict = self.lj.getParams()
+        self.assertEqual(dict["HQATTEN"], 9)
+        
+        """
+            Check that large values cap at 31.5
+        """
+        self.lj.setAttenuator(100, ["HI"])
+        dict = self.lj.getParams()
+        self.assertEqual(dict["HIATTEN"], 31.5)
+        
+        """
+            Check that 0.5 works.
+        """
+        self.lj.setAttenuator(0.5, ["VI"])
+        dict = self.lj.getParams()
+        self.assertEqual(dict["VIATTEN"], 0.5)
+    
+    """
+    Test - test_throwExceptionWhenDisconnectOrInvalid:
+        Given that we call getParams with an invalid key,
+        Then a KeyError is raised.
+        
+        Given that we are not connected to a LabJack module,
+        Then when we call getParams, a NoConnectionError is raised.
+    """
+    def test_throwExceptionWhenDisconnectOrInvalid(self):
+        self.assertRaises(KeyError, self.lj.getParams, ["FAKEKEY"])
+        
+        self.lj.disconnect()
+        self.assertRaises(sblj.NoConnectionError, self.lj.getParams)
         
     
 if __name__ == '__main__':

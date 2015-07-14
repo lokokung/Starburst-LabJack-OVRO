@@ -477,6 +477,8 @@ class AntennaLJ(StarburstLJ):
         self.hqAtt = 31.5
         self.hiAtt = 31.5
         
+        self.setAttenuator(31.5)
+        
     """
         Private attenuator methods. Do NOT call these methods directly, 
         instead, use the setAttenuator methods to do so. (These methods
@@ -490,7 +492,7 @@ class AntennaLJ(StarburstLJ):
         else:
             newVal = math.ceil(val * 2)
             
-        temp = newVal / 2
+        temp = newVal / 2.0
             
         if newVal % 2 == 1:
             ljm.eWriteName(self.handle, "FIO0", 1)
@@ -507,18 +509,22 @@ class AntennaLJ(StarburstLJ):
         ljm.eWriteName(self.handle, "CIO1", 0)
         ljm.eWriteName(self.handle, "CIO2", 0)
         ljm.eWriteName(self.handle, "CIO3", 0)
-    def __VQAttenLatch(self):
+    def __VQAttenLatch(self, newVal):
         ljm.eWriteName(self.handle, "CIO0", 1)
-        __turnOffAllLatches()
-    def __VIAttenLatch(self):
+        self.__turnOffAllLatches()
+        self.vqAtt = newVal
+    def __VIAttenLatch(self, newVal):
         ljm.eWriteName(self.handle, "CIO1", 1)
-        __turnOffAllLatches()
-    def __HQAttenLatch(self):
+        self.__turnOffAllLatches()
+        self.viAtt = newVal
+    def __HQAttenLatch(self, newVal):
         ljm.eWriteName(self.handle, "CIO2", 1)
-        __turnOffAllLatches()
-    def __HIAttenLatch(self):
+        self.__turnOffAllLatches()
+        self.hqAtt = newVal
+    def __HIAttenLatch(self, newVal):
         ljm.eWriteName(self.handle, "CIO3", 1)
-        __turnOffAllLatches()
+        self.__turnOffAllLatches()
+        self.hiAtt = newVal
         
     """
         Dictionary for attenuator method setups.
@@ -642,15 +648,10 @@ class AntennaLJ(StarburstLJ):
     """
     def setAttenuator(self, val, list=["VQ","VI","HQ","HI"]):
         if self.handle is not None:
-            newVal = __setUpAttenuations(val)
-            lookupTable = {'VQ': self.vqAtt,
-                           'VI': self.viAtt,
-                           'HQ': self.hqAtt,
-                           'HI': self.hiAtt}
+            newVal = self.__setUpAttenuations(val)
                            
             for input in list:
-                self.attDict[input](self)
-                lookupTable[input] = newVal
+                self.attDict[input](self, newVal)
                 
         else:
             raise NoConnectionError(self.identifier)
