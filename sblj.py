@@ -655,4 +655,41 @@ class AntennaLJ(StarburstLJ):
                 
         else:
             raise NoConnectionError(self.identifier)
-            
+    
+    """
+    Method selectNoiseSource(list)
+        Description: 
+            Selects noise source as input for the polarizations in list.
+        Arguments:
+            list: list of polarizations to select noise source for.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the 
+                LabJack unit.
+    """
+    def selectNoiseSource(self, list=["H","V"]):
+        if self.handle is not None:
+            if "H" in list:
+                ljm.eWriteName(self.handle, "EIO1", 1)
+            if "V" in list:
+                ljm.eWriteName(self.handle, "EIO2", 1)
+        else:
+            raise NoConnectionError(self.identifier)
+    
+    """
+    Method selectRFSource(list)
+        Description: 
+            Selects RF as input for the polarizations in list.
+        Arguments:
+            list: list of polarizations to select RF for.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the 
+                LabJack unit.
+    """
+    def selectRFSource(self, list=["H","V"]):
+        if self.handle is not None:
+            if "H" in list:
+                ljm.eWriteName(self.handle, "EIO1", 0)
+            if "V" in list:
+                ljm.eWriteName(self.handle, "EIO2", 0)
+        else:
+            raise NoConnectionError(self.identifier)
