@@ -87,8 +87,8 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         And a time stamp is returned.
     """
     def test_24V(self):
-        dict = self.lj.getParams(["24V"])
-        self.assertEqual(dict["24V"], 24)
+        dict = self.lj.getParams(["POW_24V"])
+        self.assertEqual(dict["POW_24V"], 24)
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
@@ -98,8 +98,8 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         And a time stamp is returned.
     """
     def test_15V(self):
-        dict = self.lj.getParams(["15V"])
-        self.assertEqual(dict["15V"], 15)
+        dict = self.lj.getParams(["POW_15V"])
+        self.assertEqual(dict["POW_15V"], 15)
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
@@ -109,8 +109,8 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         And a time stamp is returned.
     """
     def test_12V(self):
-        dict = self.lj.getParams(["12V"])
-        self.assertEqual(dict["12V"], 12)
+        dict = self.lj.getParams(["POW_12V"])
+        self.assertEqual(dict["POW_12V"], 12)
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
@@ -120,8 +120,8 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         And a time stamp is returned.
     """
     def test_5V(self):
-        dict = self.lj.getParams(["5V"])
-        self.assertEqual(dict["5V"], 5)
+        dict = self.lj.getParams(["POW_5V"])
+        self.assertEqual(dict["POW_5V"], 5)
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
@@ -131,8 +131,8 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         And a time stamp is returned.
     """
     def test_neg5V(self):
-        dict = self.lj.getParams(["NEG5V"])
-        self.assertEqual(dict["NEG5V"], -5)
+        dict = self.lj.getParams(["POW_N5V"])
+        self.assertEqual(dict["POW_N5V"], -5)
         self.assertTrue(dict.has_key("TIMESTAMP"))
 
     """
@@ -153,8 +153,8 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         And a time stamp is returned.
     """
     def test_s5V(self):
-        dict = self.lj.getParams(["S5V"])
-        self.assertEqual(dict["S5V"], 5)
+        dict = self.lj.getParams(["POW_S5V"])
+        self.assertEqual(dict["POW_S5V"], 5)
         self.assertTrue(dict.has_key("TIMESTAMP"))
     
 """
@@ -279,7 +279,7 @@ TestLONoiseLabJackModule Test Group Description:
     This group of tests makes sure that we can get/set the LO frequency 
     and that the settings are correct. 
     
-    Test Count: 3
+    Test Count: 4
 """
 class TestLONoiseLabJackModule(unittest.TestCase):
     """
@@ -342,7 +342,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         """
             Testing 3.4GHz.
         """
-        self.lj.setLOFreq(const.LOFreqConst.LO_3_4GHZ)
+        self.lj.setLOFreq(sblj.LOFreqConstants.LO_3_4GHZ)
         dict = self.lj.getParams(["LOFREQ"])
         
         self.assertEqual(self.mockLabJackValues["EIO4"], 0)
@@ -352,7 +352,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         """
             Testing 7.5GHz.
         """
-        self.lj.setLOFreq(const.LOFreqConst.LO_7_5GHZ)
+        self.lj.setLOFreq(sblj.LOFreqConstants.LO_7_5GHZ)
         dict = self.lj.getParams(["LOFREQ"])
         
         self.assertEqual(self.mockLabJackValues["EIO4"], 0)
@@ -362,7 +362,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         """
             Testing 11.5GHz.
         """
-        self.lj.setLOFreq(const.LOFreqConst.LO_11_5GHZ)
+        self.lj.setLOFreq(sblj.LOFreqConstants.LO_11_5GHZ)
         dict = self.lj.getParams(["LOFREQ"])
         
         self.assertEqual(self.mockLabJackValues["EIO4"], 1)
@@ -372,7 +372,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         """
             Testing 15.5GHz.
         """
-        self.lj.setLOFreq(const.LOFreqConst.LO_15_5GHZ)
+        self.lj.setLOFreq(sblj.LOFreqConstants.LO_15_5GHZ)
         dict = self.lj.getParams(["LOFREQ"])
         
         self.assertEqual(self.mockLabJackValues["EIO4"], 1)

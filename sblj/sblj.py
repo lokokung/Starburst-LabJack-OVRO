@@ -6,7 +6,6 @@
 
 from labjack import ljm
 import datetime
-import sbljconstants as const
 import copy
 import math
 
@@ -53,8 +52,21 @@ Class: InvalidLOFreqError extends Exception
 """
 class InvalidLOFreqError(Exception):
     def __str__(self):
-        return("Please refer to sbljconstant.py for LO frequency constants," +
+        return("Please refer to LOFreqConstants for LO frequency constants," +
                " or documentation for usage.")
+
+"""
+Class: LOFreqConstants
+    Description:
+        Class for holding constants for lookup and definition for LO
+        frequencies.
+"""               
+class LOFreqConstants:
+    LO_3_4GHZ = 0
+    LO_7_5GHZ = 1
+    LO_11_5GHZ = 2
+    LO_15_5GHZ = 3
+    
 """
 Class: StarburstLJ extends Object
     Description: 
@@ -115,12 +127,13 @@ class StarburstLJ(object):
             NEG5V: Voltage reading of the -5V input power in volts.
             NAME: Name of LabJack device. (Can be used as identifier.)
         """
-        self.ljVariables = ["LJTEMP", "LJAIRTEMP", "24V", "15V", "12V", "5V", 
-                            "NEG5V", "NAME", "S5V"]
+        self.ljVariables = ["LJTEMP", "LJAIRTEMP", "POW_24V", "POW_15V", 
+                            "POW_12V", "POW_5V", "POW_N5V", "NAME", 
+                            "POW_S5V"]
     
     """
         Private getter methods to retrieve specific parameters. Do NOT use 
-        these methods without its wrapper getParamsiables since these 
+        these methods without its wrapper getParams since these 
         are not error checked.
     """
     def __getLJTemp(self):
@@ -156,9 +169,9 @@ class StarburstLJ(object):
         corresponding methods that are pointed to must be defined first.)
     """
     ljVarDict = {'LJTEMP': __getLJTemp, 'LJAIRTEMP': __getLJAirTemp,
-                 '24V': __get24V, '15V': __get15V, '12V': __get12V, 
-                 '5V': __get5V, 'NEG5V': __getN5V, 'NAME': __getName,
-                 'S5V': __getS5V}
+                 'POW_24V': __get24V, 'POW_15V': __get15V, 
+                 'POW_12V': __get12V, 'POW_5V': __get5V, 'POW_N5V': __getN5V,
+                 'NAME': __getName, 'POW_S5V': __getS5V}
      
     """
     Method: connect()
@@ -278,7 +291,7 @@ class LONoiseLJ(StarburstLJ):
         self.ljLOVariables = ["LOFREQ", "NSSTAT"]
         self.ljVariables.extend(self.ljLOVariables)
         self.LOConstantNames = {value: name for name, 
-                                value in vars(const.LOFreqConst).items() 
+                                value in vars(LOFreqConstants).items() 
                                 if name.isupper()}
                                         
     """
@@ -323,21 +336,21 @@ class LONoiseLJ(StarburstLJ):
     """
         Dictionary lookup for LO settings and corresponding methods.
     """
-    ljLODict = {const.LOFreqConst.LO_3_4GHZ: __3_4GHZ, 
-                const.LOFreqConst.LO_7_5GHZ: __7_5GHZ,
-                const.LOFreqConst.LO_11_5GHZ: __11_5GHZ, 
-                const.LOFreqConst.LO_15_5GHZ: __15_5GHZ}
+    ljLODict = {LOFreqConstants.LO_3_4GHZ: __3_4GHZ, 
+                LOFreqConstants.LO_7_5GHZ: __7_5GHZ,
+                LOFreqConstants.LO_11_5GHZ: __11_5GHZ, 
+                LOFreqConstants.LO_15_5GHZ: __15_5GHZ}
     
     """
     Method: setLOFreq(freq)
         Description:
             Sets the LO frequency to the desired level.
         Arguments:
-            freq: a frequency option defined in sbljconstants.py. Please refer
+            freq: a frequency option defined in LOFreqConstants. Please refer
                 there for the constant values.
         Raises:
             InvalidLOFreqError: occurs when freq is not a defined frequency 
-                option from sbljconstants.py.
+                option from LOFreqConstants.
             NoConnectionError: occurs when there is no connection to the
                 LabJack unit.
             
