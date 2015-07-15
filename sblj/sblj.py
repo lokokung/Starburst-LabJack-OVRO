@@ -214,6 +214,18 @@ class StarburstLJ(object):
             self.handle = None
     
     """
+    Method: reboot()
+        Description:
+            Reboots the LabJack device.
+    """
+    def reboot(self):
+        if self.handle is not None:
+            ljm.eWriteName(self.handle, "SYSTEM_REBOOT",
+                           0x4C4A0000)
+        else:
+            raise NoConnectionError(self.identifier)
+    
+    """
     Method: getParams(variables)
         Description: 
             Main query to LabJack modules for hardware information. 
@@ -246,7 +258,8 @@ class StarburstLJ(object):
             Used for setting an arbitrary name for the LabJack devices. This 
             name can then be used as an identifier for the LabJack. After 
             calling this method, a physical restart of the LabJack is 
-            necessary in order for the changes to take place.
+            necessary in order for the changes to take place. The restart
+            can be done using the reboot() method.
         Arguments:
             name: the new name that the LabJack should be assigned. Note that
                 the LabJack itself limits the name to be at most 49 

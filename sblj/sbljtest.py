@@ -15,24 +15,9 @@ TestGenericLabJackGetParams Test Group Description:
     returns values on a LabJack with given names, that the getParams
     function returns the correct output. 
     
-    Test Count: 9
+    Test Count: 10
 """
-class TestGenericLabJackGetParams(unittest.TestCase):
-    """
-        Dictionary of values that the mock LabJack will return for call with 
-        names corresponding to the keys of the dictionary.
-    """
-    mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
-                         'TEMPERATURE_AIR_K': 298,
-                         'AIN4': 8,
-                         'AIN5': 7.5,
-                         'AIN6': 6,
-                         'AIN7': 5,
-                         'AIN8': 5,
-                         'AIN9': -5,
-                         'DEVICE_NAME_DEFAULT': 'MockLabJack',
-                         'SERIAL_NUMBER': 1000}
-    
+class TestGenericLabJackGetParams(unittest.TestCase):    
     """
         Monkey patching methods for LJM Library in order to unit test 
         effectively. The new method is injected in the setUp and removed 
@@ -46,6 +31,21 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         return self.mockLabJackValues[name]
     
     def setUp(self):
+        """
+            Dictionary of values that the mock LabJack will return for 
+            call with names corresponding to the keys of the dictionary.
+        """
+        self.mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
+                                  'TEMPERATURE_AIR_K': 298,
+                                  'AIN4': 8,
+                                  'AIN5': 7.5,
+                                  'AIN6': 6,
+                                  'AIN7': 5,
+                                  'AIN8': 5,
+                                  'AIN9': -5,
+                                  'DEVICE_NAME_DEFAULT': 'MockLabJack',
+                                  'SERIAL_NUMBER': 1000}
+                         
         self.lj = sblj.StarburstLJ("ANY","ANY","ANY","MOCK")
         
         self.o_eReadName = ljm.eReadName
@@ -217,7 +217,7 @@ TestGenericLabJackName Test Group Description:
 """
 class TestGenericLabJackName(unittest.TestCase):
     """
-        Monkey patching method for LJM Library in order to unit test 
+        Monkey patching methods for LJM Library in order to unit test 
         effectively. The new method is injected in the setUp and removed 
         in the tearDown to allow for running of individual test cases in 
         this group.
@@ -283,7 +283,42 @@ class TestGenericLabJackName(unittest.TestCase):
         self.lj.disconnect()
         self.assertRaises(sblj.NoConnectionError, 
                           self.lj.setLJName, "Name")
+
+
+"""
+TestGenericLabJackReboot Test Group Description:
+    This group of tests makes sure that the reboot function across
+    generic LabJack's works.
     
+    Test Count: 1
+"""
+class TestGenericLabJackReboot(unittest.TestCase):
+    """
+        Monkey patching methods for LJM Library in order to unit test 
+        effectively. The new method is injected in the setUp and removed 
+        in the tearDown to allow for running of individual test cases in 
+        this group.
+    """
+    def eWriteName(self, handle, name, newVal):
+        if name is "SYSTEM_REBOOT":
+            self.reboot = newVal
+        
+    def setUp(self):
+        self.reboot = 0
+        self.lj = sblj.StarburstLJ("", "", "", "MOCK")
+        
+        self.o_eWriteName = ljm.eWriteName
+        
+        ljm.eWriteName = self.eWriteName
+        
+    def tearDown(self):
+        ljm.eWriteName = self.o_eWriteName
+        
+    def test_rebootChangesRebootValue(self):
+        self.lj.reboot()
+        
+        self.assertEqual(self.reboot, 0x4C4A0000)
+                          
 
 """
 TestLONoiseLabJackModule Test Group Description:
@@ -312,6 +347,10 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         self.mockLabJackValues[name] = newVal
     
     def setUp(self):
+        """
+            Dictionary of values that the mock LabJack will return for 
+            call with names corresponding to the keys of the dictionary.
+        """
         self.mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
                                   'TEMPERATURE_AIR_K': 298,
                                   'AIN4': 8,
@@ -465,6 +504,10 @@ class TestAntennaLabJackModule(unittest.TestCase):
         self.mockLabJackValues[name] = newVal
     
     def setUp(self):
+        """
+            Dictionary of values that the mock LabJack will return for 
+            call with names corresponding to the keys of the dictionary.
+        """
         self.mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
                                   'TEMPERATURE_AIR_K': 298,
                                   'AIN0': 1.2,
@@ -618,8 +661,8 @@ class TestAntennaLabJackModule(unittest.TestCase):
     
 if __name__ == '__main__':
     testGroups = [TestGenericLabJackGetParams, TestGenericLabJackConnections,
-                  TestGenericLabJackName, TestLONoiseLabJackModule,
-                  TestAntennaLabJackModule]
+                  TestGenericLabJackReboot, TestGenericLabJackName, 
+                  TestLONoiseLabJackModule, TestAntennaLabJackModule]
     for tG in testGroups:
         print "\nTesting: " + str(tG.__name__)
         suite = unittest.TestLoader().loadTestsFromTestCase(
