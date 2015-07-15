@@ -126,10 +126,11 @@ class StarburstLJ(object):
             POW_S5V: Voltage reading of switched +5V input power in volts.
             POW_N5V: Voltage reading of the -5V input power in volts.
             NAME: Name of LabJack device. (Can be used as identifier.)
+            SERIAL: Serial number of LabJack device.
         """
         self.ljVariables = ["LJTEMP", "LJAIRTEMP", "POW_24V", "POW_15V", 
                             "POW_12V", "POW_5V", "POW_N5V", "NAME", 
-                            "POW_S5V"]
+                            "POW_S5V", "SERIAL"]
     
     """
         Private getter methods to retrieve specific parameters. Do NOT use 
@@ -163,6 +164,9 @@ class StarburstLJ(object):
     def __getS5V(self):
         volt = ljm.eReadName(self.handle, "AIN8")
         return volt
+    def __getSerial(self):
+        serial = ljm.eReadName(self.handle, "SERIAL_NUMBER")
+        return serial
         
     """
         Dictionary lookup for parameters (Placed here because the 
@@ -171,7 +175,7 @@ class StarburstLJ(object):
     ljVarDict = {'LJTEMP': __getLJTemp, 'LJAIRTEMP': __getLJAirTemp,
                  'POW_24V': __get24V, 'POW_15V': __get15V, 
                  'POW_12V': __get12V, 'POW_5V': __get5V, 'POW_N5V': __getN5V,
-                 'NAME': __getName, 'POW_S5V': __getS5V}
+                 'NAME': __getName, 'POW_S5V': __getS5V, 'SERIAL': __getSerial}
      
     """
     Method: connect()

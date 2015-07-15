@@ -30,7 +30,8 @@ class TestGenericLabJackGetParams(unittest.TestCase):
                          'AIN7': 5,
                          'AIN8': 5,
                          'AIN9': -5,
-                         'DEVICE_NAME_DEFAULT': 'MockLabJack'}
+                         'DEVICE_NAME_DEFAULT': 'MockLabJack',
+                         'SERIAL_NUMBER': 1000}
     
     """
         Monkey patching methods for LJM Library in order to unit test 
@@ -154,6 +155,17 @@ class TestGenericLabJackGetParams(unittest.TestCase):
     def test_s5V(self):
         dict = self.lj.getParams(["POW_S5V"])
         self.assertEqual(dict["POW_S5V"], 5)
+        self.assertTrue(dict.has_key("TIMESTAMP"))
+        
+    """
+    Test - test_serial:
+        Given that the LabJack's serial is 1000,
+        Then getParams(["SERIAL"]) returns 1000,
+        And a time stamp is returned.
+    """
+    def test_serial(self):
+        dict = self.lj.getParams(["SERIAL"])
+        self.assertEqual(dict["SERIAL"], 1000)
         self.assertTrue(dict.has_key("TIMESTAMP"))
     
 """
@@ -311,7 +323,8 @@ class TestLONoiseLabJackModule(unittest.TestCase):
                                   'EIO0': 0,
                                   'EIO3': 0,
                                   'EIO4': 0,
-                                  'DEVICE_NAME_DEFAULT': 'MockLabJack'}
+                                  'DEVICE_NAME_DEFAULT': 'MockLabJack',
+                                  'SERIAL_NUMBER': 1000}
         
         self.lj = sblj.LONoiseLJ("","","","MOCK")
         
@@ -480,7 +493,8 @@ class TestAntennaLabJackModule(unittest.TestCase):
                                   "FIO3": 1,
                                   "FIO4": 1,
                                   "FIO5": 1,
-                                  'DEVICE_NAME_DEFAULT': 'MockLabJack'}
+                                  'DEVICE_NAME_DEFAULT': 'MockLabJack',
+                                  'SERIAL_NUMBER': 1000}
         
         self.o_eReadName = ljm.eReadName
         self.o_eReadNameString = ljm.eReadNameString
