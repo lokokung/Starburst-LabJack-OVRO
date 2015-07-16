@@ -13,7 +13,7 @@ Class: InvalidBandError extends Exception
     Description: 
         Custom error for indicating that an invalid band was selected.
 """                
-class NoConnectionError(Exception):
+class InvalidBandError(Exception):
     def __init__(self, band):
         self.band = band
         

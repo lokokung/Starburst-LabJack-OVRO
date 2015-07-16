@@ -14,6 +14,8 @@ TestOVROMethods Test Group Description:
     This is a group of unit tests that test each method offered by the
     ovro module. This group only provides for basic functionality 
     testing.
+    
+    Test Count: 6
 """
 class TestOVROMethods(unittest.TestCase):
     """
@@ -226,6 +228,14 @@ class TestOVROMethods(unittest.TestCase):
             self.assertEqual(dict[key]["VIATTEN"], 10)
             self.assertEqual(dict[key]["HQATTEN"], 12)
             self.assertEqual(dict[key]["HIATTEN"], 12)
+    
+    """
+    Test - test_setToBandNonexistantBandRaisesError:
+        Given that we try setting to a band that does not exist,
+        Then a InvalidBandError is raised.
+    """
+    def test_setToBandNonexistantBandRaisesError(self):
+        self.assertRaises(ovro.InvalidBandError, self.ovroObj.setToBand, 123)
         
     """
     Test - test_alterAntByDelta:
