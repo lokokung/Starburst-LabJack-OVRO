@@ -482,7 +482,7 @@ TestAntennaLabJackModule Test Group Description:
     This group of tests makes sure that the methods for the AntennaLJ
     work properly.
     
-    Test Count: 4
+    Test Count: 5
 """    
 class TestAntennaLabJackModule(unittest.TestCase):
     """
@@ -621,6 +621,25 @@ class TestAntennaLabJackModule(unittest.TestCase):
         self.lj.setAttenuator(0.5, ["VI"])
         dict = self.lj.getParams()
         self.assertEqual(dict["VIATTEN"], 0.5)
+        
+        """
+            Check that negatives become 0.
+        """
+        self.lj.setAttenuator(-10, ["VI"])
+        dict = self.lj.getParams()
+        self.assertEqual(dict["VIATTEN"], 0)
+    
+    """
+    Test - test_deltaAttenuatorChangesValuesCorrectly:
+        Given that we change VQ and VI by -1, 
+        Then the new values should be 30.5.
+    """
+    def test_deltaAttenuatorChangesValuesCorrectly(self):
+        self.lj.deltaAttenuator(-1, ["VQ", "VI"])
+        dict = self.lj.getParams()
+        self.assertEqual(dict["VQATTEN"], 30.5)
+        self.assertEqual(dict["VIATTEN"], 30.5)
+    
     
     """
     Test - test_rfNoiseSourceSelection:

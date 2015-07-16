@@ -227,6 +227,21 @@ class TestOVROMethods(unittest.TestCase):
             self.assertEqual(dict[key]["HQATTEN"], 12)
             self.assertEqual(dict[key]["HIATTEN"], 12)
         
+    """
+    Test - test_alterAntByDelta:
+        Given that we decrement all attenuations by 10,
+        Then the new attenuations is all 21.5.
+    """
+    def test_alterAntByDelta(self):
+        self.ovroObj.alterAntByDelta(-10)
+        
+        for key in self.dictOfAntennas.keys():
+            dict = self.ovroObj.getMonitorData()
+            self.assertEqual(dict[key]["VQATTEN"], 21.5)
+            self.assertEqual(dict[key]["VIATTEN"], 21.5)
+            self.assertEqual(dict[key]["HQATTEN"], 21.5)
+            self.assertEqual(dict[key]["HIATTEN"], 21.5)
+    
 """
 Main Method
 """

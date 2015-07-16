@@ -518,10 +518,7 @@ class AntennaLJ(StarburstLJ):
         """
         Ghost copy of attenuations for each component
         """
-        self.vqAtt = 31.5
-        self.viAtt = 31.5
-        self.hqAtt = 31.5
-        self.hiAtt = 31.5
+        self.allAtt = {"VQ": 31.5, "VI": 31.5, "HQ": 31.5, "HI": 31.5}
         
         self.setAttenuator(31.5)
         
@@ -535,6 +532,8 @@ class AntennaLJ(StarburstLJ):
         
         if val > 31:
             newVal = 63
+        elif val < 0:
+            newVal = 0
         else:
             newVal = math.ceil(val * 2)
             
@@ -558,19 +557,19 @@ class AntennaLJ(StarburstLJ):
     def __VQAttenLatch(self, newVal):
         ljm.eWriteName(self.handle, "CIO0", 1)
         self.__turnOffAllLatches()
-        self.vqAtt = newVal
+        self.allAtt["VQ"] = newVal
     def __VIAttenLatch(self, newVal):
         ljm.eWriteName(self.handle, "CIO1", 1)
         self.__turnOffAllLatches()
-        self.viAtt = newVal
+        self.allAtt["VI"] = newVal
     def __HQAttenLatch(self, newVal):
         ljm.eWriteName(self.handle, "CIO2", 1)
         self.__turnOffAllLatches()
-        self.hqAtt = newVal
+        self.allAtt["HQ"] = newVal
     def __HIAttenLatch(self, newVal):
         ljm.eWriteName(self.handle, "CIO3", 1)
         self.__turnOffAllLatches()
-        self.hiAtt = newVal
+        self.allAtt["HI"] = newVal
         
     """
         Dictionary for attenuator method setups.
@@ -618,13 +617,13 @@ class AntennaLJ(StarburstLJ):
         temp = 478 * temp - 267
         return temp
     def __getVQAtt(self):
-        return self.vqAtt
+        return self.allAtt["VQ"]
     def __getVIAtt(self):
-        return self.viAtt
+        return self.allAtt["VI"]
     def __getHQAtt(self):
-        return self.hqAtt
+        return self.allAtt["HQ"]
     def __getHIAtt(self):
-        return self.hiAtt
+        return self.allAtt["HI"]
     def __getVNoiseSel(self):
         sel = ljm.eReadName(self.handle, "EIO2")
         return sel
@@ -696,6 +695,27 @@ class AntennaLJ(StarburstLJ):
         newVal = self.__setUpAttenuations(level)
                        
         for input in list:
+            self.attDict[input](self, newVal)
+    
+    """
+    Method deltaAttenuator(delta, list)
+        Description:
+            Alters the attenuation to the smallest 0.5 increment larger 
+            than the current setting plus delta. This is between 0 and
+            31dB due to hardware.
+        Arguments:
+            delta: change to attenuations, positive indicates increase,
+            negative indicates decrease.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the 
+                LabJack unit.
+            KeyError occurs when designated attenuator is non-existent.
+    """
+    def deltaAttenuator(self, delta, list=["VQ","VI","HQ","HI"]):
+        self.errorCheck()
+        
+        for input in list:
+            newVal = self.__setUpAttenuations(self.allAtt[input] + delta)
             self.attDict[input](self, newVal)
     
     """

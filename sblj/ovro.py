@@ -150,4 +150,27 @@ class OVROStarburst(object):
         for lj in antennas:
             for val, list in ref["ATTEN"]:
                 self.ljDictOfAntennas[lj].setAttenuator(val, list)
-            
+    
+    """
+    Method: alterAntByDelta(delta, antennas)
+        Description:
+            Alters the attenuation of all polarization/components of the 
+            given antennas by delta.
+        Parameters:
+            delta: amount to change the attenuations by.
+            antennas: list of keys to antennas that the attenuation changes
+                should apply to.
+        Raises:
+            InvalidBandError: occurs when the .bands setting does not have 
+                values for a given band.
+            NoConnectionError: occurs when there is no connection to the 
+                at least one of the LabJack units.
+            KeyError: occurs when a key in antennas does not match to any 
+                AntennaLJ objects.
+    """
+    def alterAntByDelta(self, delta, antennas=None):
+        if antennas is None:
+            antennas = self.ljDictOfAntennas.keys()
+        
+        for lj in antennas:
+            self.ljDictOfAntennas[lj].deltaAttenuator(delta)
