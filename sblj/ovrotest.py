@@ -6,6 +6,7 @@
 
 import unittest
 from labjack import ljm
+import sblj
 import ovro
 
 class TestOVROGetMonitorData(unittest.TestCase):
@@ -15,36 +16,23 @@ class TestOVROGetMonitorData(unittest.TestCase):
         removed in the tearDown to allow for running of individual test 
         cases in this group.
     """
-    def newInit(self, identifier="ANY", connectionType="ETHERNET", 
-                 deviceType="T7", handle=None):
-        if not isinstance(deviceType, str):
-            raise TypeError("Expected a string instead of " + 
-                            str(type(deviceType)) + ".")
-        if not isinstance(connectionType, str):
-            raise TypeError("Expected a string instead of " + 
-                            str(type(connectionType)) + ".")
+    def connect(self):
+        pass
         
-        self.identifier = str(identifier)
-        self.connectionType = connectionType
-        self.deviceType = deviceType
-
-        self.handle = self.identifier
-        
-        self.ljVariables = ["LJTEMP", "LJAIRTEMP", "POW_24V", "POW_15V", 
-                            "POW_12V", "POW_5V", "POW_N5V", "NAME", 
-                            "POW_S5V", "SERIAL"]
+    def setAttenuator(self, level, list=None):
+        pass
                         
     def eReadName(self, handle, name):
-        return self.mockLabJackValues[handle][name]
+        return self.testValues[handle][name]
         
     def eReadNameString(self, handle, name):
-        return self.mockLabJackValues[handle][name]
+        return self.testValues[handle][name]
         
     def eWriteName(self, handle, name, newVal):
-        self.mockLabJackValues[handle][name] = newVal
+        self.testValues[handle][name] = newVal
         
     def eWriteNameString(self, handle, name, newVal):
-        self.mockLabJackValues[handle][name] = newVal
+        self.testValues[handle][name] = newVal
         
     def setUp(self):
         """
@@ -97,27 +85,81 @@ class TestOVROGetMonitorData(unittest.TestCase):
                         'SERIAL_NUMBER': 1000}
             }
         
-        self.o_oldInit = sblj.StarburstLJ.__init__
+        self.o_connect = sblj.StarburstLJ.connect
+        self.o_setAttenuator = sblj.AntennaLJ.setAttenuator
         self.o_eReadName = ljm.eReadName
         self.o_eReadNameString = ljm.eReadNameString
         self.o_eWriteName = ljm.eWriteName
         self.o_eWriteNameString = ljm.eWriteNameString
         
-        sblj.StarburstLJ.__init__ = self.newInit
+        sblj.StarburstLJ.connect = self.connect
+        sblj.AntennaLJ.setAttenuator = self.setAttenuator
         ljm.eReadName = self.eReadName
         ljm.eReadNameString = self.eReadNameString
         ljm.eWriteName = self.eWriteName
         ljm.eWriteNameString = self.eWriteNameString
         
+        self.ovroObj = ovro.OVROStarburst("LONoise", {"Antenna": "Antenna"}, 1)
+        self.ovroObj.ljLONoise.handle = "LONoise"
+        self.ovroObj.ljDictOfAntennas["Antenna"].handle = "Antenna"
+        
     def tearDown(self):
-        sblj.StarburstLJ.__init__ = self.o_oldInit
+        sblj.StarburstLJ.connect = self.o_connect
+        sblj.AntennaLJ.setAttenuator = self.o_setAttenuator
         ljm.eReadName = self.o_eReadName
         ljm.eReadNameString = self.o_eReadNameString
         ljm.eWriteName = self.o_eWriteName
         ljm.eWriteNameString = self.o_eWriteNameString
-        
+    
+    """
+    Test - test_getMonitorDataReturnsCorrectValues:
+        Given that we call getMonitorData when a single antenna and the 
+            LO noise module is supplied with the values on the pins/register
+            defined in testValues,
+        Then the dictionary of dictionaries returned contains the correct 
+            values in the correct places.
+    """
     def test_getMonitorDataReturnsCorrectValues(self):
+        dict = self.ovroObj.getMonitorData()
         
+        """
+            Assertions for generic LabJacks.
+        """
+        for id in ["Antenna", "LONOISE"]:
+            self.assertEqual(dict[id]["NAME"], "MockLabJack")
+            self.assertEqual(dict[id]["LJTEMP"], 300)
+            self.assertEqual(dict[id]["LJAIRTEMP"], 298)
+            self.assertEqual(dict[id]["POW_24V"], 24)
+            self.assertEqual(dict[id]["POW_15V"], 15)
+            self.assertEqual(dict[id]["POW_12V"], 12)
+            self.assertEqual(dict[id]["POW_5V"], 5)
+            self.assertEqual(dict[id]["POW_N5V"], -5)
+            self.assertEqual(dict[id]["POW_S5V"], 5)
+            self.assertEqual(dict[id]["SERIAL"], 1000)
+        
+        """
+            Assertions for the antenna.
+        """
+        self.assertEqual(dict["Antenna"]["HIPOW"], -24)
+        self.assertEqual(dict["Antenna"]["HQPOW"], -24)
+        self.assertEqual(dict["Antenna"]["VIPOW"], -24)
+        self.assertEqual(dict["Antenna"]["VQPOW"], -24)
+        self.assertEqual(dict["Antenna"]["HITEMP"], 211)
+        self.assertEqual(dict["Antenna"]["HQTEMP"], 211)
+        self.assertEqual(dict["Antenna"]["VITEMP"], 211)
+        self.assertEqual(dict["Antenna"]["VQTEMP"], 211)
+        self.assertEqual(dict["Antenna"]["VNSSEL"], 0)
+        self.assertEqual(dict["Antenna"]["HNSSEL"], 0)
+        self.assertEqual(dict["Antenna"]["HIATTEN"], 31.5)
+        self.assertEqual(dict["Antenna"]["HQATTEN"], 31.5)
+        self.assertEqual(dict["Antenna"]["VIATTEN"], 31.5)
+        self.assertEqual(dict["Antenna"]["VQATTEN"], 31.5)
+        
+        """
+            Assertions for the LO Noise module.
+        """
+        self.assertEqual(dict["LONOISE"]["LOFREQ"], "LO_3_4GHZ")
+        self.assertEqual(dict["LONOISE"]["NSSTAT"], 0)
         
 if __name__ == '__main__':
     testGroups = [TestOVROGetMonitorData]

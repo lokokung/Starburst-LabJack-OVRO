@@ -33,12 +33,13 @@ class OVROStarburst(object):
         
         self.ljDictOfAntennas = {}
         for key, value in self.dictOfAntennaIDs.items():
-            ljDictOfAntennas[key] = sblj.AntennaLJ(value)
+            self.ljDictOfAntennas[key] = sblj.AntennaLJ(value)
     
     def getMonitorData(self):
         varDump = {}
         varDump["LONOISE"] = self.ljLONoise.getParams()
         
-        for key, lj in self.ljDictOfAntennas.items:
+        for key, lj in self.ljDictOfAntennas.items():
             varDump[key] = lj.getParams()
-            
+        
+        return varDump

@@ -7,7 +7,6 @@
 import unittest
 from labjack import ljm
 import sblj
-import sys
     
 """
 TestGenericLabJackGetParams Test Group Description:

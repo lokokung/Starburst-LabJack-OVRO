@@ -95,6 +95,24 @@ Class: StarburstLJ extends Object
                 valid LabJack module.
 """        
 class StarburstLJ(object):
+    """
+    LabJack Parameters across generic modules:
+        LJTEMP: Temperature of the CPU unit of the LabJack in Kelvin.
+        LJAIRTEMP: Temperature of the surrounding environment 
+            of the LabJack in Kelvin.
+        POW_24V: Voltage reading of the +24V input power in volts.
+        POW_15V: Voltage reading of the +15V input power in volts.
+        POW_12V: Voltage reading of the +12V input power in volts.
+        POW_5V: Voltage reading of the +5V input power in volts.
+        POW_S5V: Voltage reading of switched +5V input power in volts.
+        POW_N5V: Voltage reading of the -5V input power in volts.
+        NAME: Name of LabJack device. (Can be used as identifier.)
+        SERIAL: Serial number of LabJack device.
+    """
+    ljVariables = ["LJTEMP", "LJAIRTEMP", "POW_24V", "POW_15V", 
+                   "POW_12V", "POW_5V", "POW_N5V", "NAME", 
+                   "POW_S5V", "SERIAL"]
+                            
     def __init__(self, identifier="ANY", connectionType="ETHERNET", 
                  deviceType="T7", handle=None):   
         if not isinstance(deviceType, str):
@@ -113,24 +131,6 @@ class StarburstLJ(object):
             self.connect()
         else: 
             self.handle = handle
-            
-        """
-        LabJack Parameters across generic modules:
-            LJTEMP: Temperature of the CPU unit of the LabJack in Kelvin.
-            LJAIRTEMP: Temperature of the surrounding environment 
-                of the LabJack in Kelvin.
-            POW_24V: Voltage reading of the +24V input power in volts.
-            POW_15V: Voltage reading of the +15V input power in volts.
-            POW_12V: Voltage reading of the +12V input power in volts.
-            POW_5V: Voltage reading of the +5V input power in volts.
-            POW_S5V: Voltage reading of switched +5V input power in volts.
-            POW_N5V: Voltage reading of the -5V input power in volts.
-            NAME: Name of LabJack device. (Can be used as identifier.)
-            SERIAL: Serial number of LabJack device.
-        """
-        self.ljVariables = ["LJTEMP", "LJAIRTEMP", "POW_24V", "POW_15V", 
-                            "POW_12V", "POW_5V", "POW_N5V", "NAME", 
-                            "POW_S5V", "SERIAL"]
     
     """
         Private getter methods to retrieve specific parameters. Do NOT use 
@@ -244,7 +244,7 @@ class StarburstLJ(object):
         if self.handle is not None:
             varDump = {'TIMESTAMP': str(datetime.datetime.utcnow())}
             if variables is None:
-                variables = self.ljVariables
+                variables = StarburstLJ.ljVariables
             
             for var in variables:
                 varDump[var] = self.ljVarDict[var](self)
@@ -294,7 +294,18 @@ Class: LONoiseLJ extends StarburstLJ
     Raises:
         (Same as those of StarburstLJ. Refer to the description above.)
 """        
-class LONoiseLJ(StarburstLJ):   
+class LONoiseLJ(StarburstLJ):
+    """
+    LabJack Parameters across generic modules:
+        LOFREQ: Current set LO setting.
+        NSSTATUS: On/Off status of noise source (0=off, 1=on).
+    """
+    ljVariables = ["LJTEMP", "LJAIRTEMP", "POW_24V", "POW_15V", 
+                   "POW_12V", "POW_5V", "POW_N5V", "NAME", 
+                   "POW_S5V", "SERIAL", "LOFREQ", "NSSTAT"]
+                   
+    ljLOVariables = ["LOFREQ", "NSSTAT"]
+                   
     def __init__(self, identifier="ANY", connectionType="ETHERNET", 
                  deviceType="T7", handle=None):
         super(LONoiseLJ, self).__init__(identifier, connectionType,
@@ -304,9 +315,7 @@ class LONoiseLJ(StarburstLJ):
         LabJack Parameters across LO/Noise Source modules
             LOFREQ: Current set LO setting.
             NSSTATUS: On/Off status of noise source (0=off, 1=on).
-        """        
-        self.ljLOVariables = ["LOFREQ", "NSSTAT"]
-        self.ljVariables.extend(self.ljLOVariables)
+        """
         self.LOConstantNames = {value: name for name, 
                                 value in vars(LOFreqConstants).items() 
                                 if name.isupper()}
@@ -428,12 +437,12 @@ class LONoiseLJ(StarburstLJ):
     def getParams(self, variables=None):
         if self.handle is not None:
             if variables is None:
-                variables = self.ljVariables
+                variables = LONoiseLJ.ljVariables
                 
             cpy = copy.copy(variables)
             varDump = {}
         
-            for var in self.ljLOVariables:
+            for var in LONoiseLJ.ljLOVariables:
                 if var in cpy:
                     varDump[var] = self.ljLOVarDict[var](self)
                     cpy.remove(var)
@@ -456,48 +465,53 @@ Class: AntennaLJ extends StarburstLJ
         (Same as those of StarburstLJ. Refer to the description above.)
 """            
 class AntennaLJ(StarburstLJ):
+    """
+    LabJack Parameters across Antenna modules
+        VQPOW: IF Power to the Q component of the Vertical polarization 
+            given in dBm.
+        VIPOW: IF Power to the I component of the Vertical polarization
+            given in dBm.
+        HQPOW: IF Power to the Q component of the Horizontal polarization
+            given in dBm.
+        HIPOW: IF Power to the I component of the Horizontal polarization
+            given in dBm.
+        VQTEMP: Temperature of Q component of the Vertical polarization
+            given in degrees Celsius.
+        VITEMP: Temperature of I component of the Vertical polarization
+            given in degrees Celsius.
+        HQTEMP: Temperature of Q component of the Horizontal polarization
+            given in degrees Celsius.
+        HITEMP: Temperature of I component of the Horizontal polarization
+            given in degrees Celsius.
+        VQATTEN: Attenuation settings for the Q of Vertical polarization
+            given in dB.
+        VIATTEN: Attenuation settings for the I of Vertical polarization
+            given in dB.
+        HQATTEN: Attenuation settings for the Q of Horizontal polarization
+            given in dB.
+        HIATTEN: Attenuation settings for the I of Horizontal polarization
+            given in dB.
+        VNSSEL: Noise source selection for Vertical polarization 
+            (0=antenna, 1=noise source).
+        HNSSEL: Noise source selection for Horizontal polarization 
+            (0=antenna, 1=noise source).
+        """        
+    ljVariables = ["LJTEMP", "LJAIRTEMP", "POW_24V", "POW_15V", 
+                   "POW_12V", "POW_5V", "POW_N5V", "NAME", 
+                   "POW_S5V", "SERIAL","VQPOW", "VIPOW", "HQPOW", "HIPOW",
+                   "VQTEMP", "VITEMP", "HQTEMP", "HITEMP",
+                   "VQATTEN", "VIATTEN", "HQATTEN", "HIATTEN",
+                   "VNSSEL", "HNSSEL"]
+                   
+    ljAVariables = ["VQPOW", "VIPOW", "HQPOW", "HIPOW",
+                    "VQTEMP", "VITEMP", "HQTEMP", "HITEMP",
+                    "VQATTEN", "VIATTEN", "HQATTEN", "HIATTEN",
+                    "VNSSEL", "HNSSEL"]
+                             
     def __init__(self, identifier="ANY", connectionType="ETHERNET", 
                  deviceType="T7", handle=None):
         super(AntennaLJ, self).__init__(identifier, connectionType,
                                         deviceType, handle)
-        
-        """
-        LabJack Parameters across Antenna modules
-            VQPOW: IF Power to the Q component of the Vertical polarization 
-                given in dBm.
-            VIPOW: IF Power to the I component of the Vertical polarization
-                given in dBm.
-            HQPOW: IF Power to the Q component of the Horizontal polarization
-                given in dBm.
-            HIPOW: IF Power to the I component of the Horizontal polarization
-                given in dBm.
-            VQTEMP: Temperature of Q component of the Vertical polarization
-                given in degrees Celsius.
-            VITEMP: Temperature of I component of the Vertical polarization
-                given in degrees Celsius.
-            HQTEMP: Temperature of Q component of the Horizontal polarization
-                given in degrees Celsius.
-            HITEMP: Temperature of I component of the Horizontal polarization
-                given in degrees Celsius.
-            VQATTEN: Attenuation settings for the Q of Vertical polarization
-                given in dB.
-            VIATTEN: Attenuation settings for the I of Vertical polarization
-                given in dB.
-            HQATTEN: Attenuation settings for the Q of Horizontal polarization
-                given in dB.
-            HIATTEN: Attenuation settings for the I of Horizontal polarization
-                given in dB.
-            VNSSEL: Noise source selection for Vertical polarization 
-                (0=antenna, 1=noise source).
-            HNSSEL: Noise source selection for Horizontal polarization 
-                (0=antenna, 1=noise source).
-            
-        """        
-        self.ljAVariables = ["VQPOW", "VIPOW", "HQPOW", "HIPOW",
-                             "VQTEMP", "VITEMP", "HQTEMP", "HITEMP",
-                             "VQATTEN", "VIATTEN", "HQATTEN", "HIATTEN",
-                             "VNSSEL", "HNSSEL"]
-        self.ljVariables.extend(self.ljAVariables)
         
         """
         Ghost copy of attenuations for each component
@@ -646,12 +660,12 @@ class AntennaLJ(StarburstLJ):
     def getParams(self, variables=None):
         if self.handle is not None:
             if variables is None:
-                variables = self.ljVariables
+                variables = AntennaLJ.ljVariables
                 
             cpy = copy.copy(variables)
             varDump = {}
         
-            for var in self.ljAVariables:
+            for var in AntennaLJ.ljAVariables:
                 if var in cpy:
                     varDump[var] = self.ljAVarDict[var](self)
                     cpy.remove(var)
