@@ -111,7 +111,7 @@ class TestOVROMethods(unittest.TestCase):
         
         self.dictOfAntennas = {"Antenna": "Antenna"}
         
-        self.ovroObj = ovro.OVROStarburst("LONoise", self.dictOfAntennas, 1)
+        self.ovroObj = ovro.OVROStarburst("LONoise", self.dictOfAntennas)
         self.ovroObj.ljLONoise.handle = "LONoise"
         self.ovroObj.ljDictOfAntennas["Antenna"].handle = "Antenna"
         

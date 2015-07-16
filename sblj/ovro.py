@@ -31,7 +31,6 @@ Class: OVROStarburst extends object
         dictOfAntennaIDs: dictionary with the keys being a way to reference
             the different antennas and the values being an identifier string
             to the LabJack corresponding to the antenna.
-        bandLevel: band level to initialize the system to.
     Raises:
         UnknownDeviceError: occurs when device description such as 
                 identifier, deviceType, or connectionType, do not point to a
@@ -47,7 +46,7 @@ class OVROStarburst(object):
                                     (12, ["HQ", "HI"]) ], 
                           "DESCR": "Default band" } }
                                     
-    def __init__(self, noiseLOID, dictOfAntennaIDs, bandLevel):
+    def __init__(self, noiseLOID, dictOfAntennaIDs):
         self.noiseLOID = noiseLOID
         self.dictOfAntennaIDs = copy.copy(dictOfAntennaIDs)
         
