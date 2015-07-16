@@ -219,11 +219,10 @@ class StarburstLJ(object):
             Reboots the LabJack device.
     """
     def reboot(self):
-        if self.handle is not None:
-            ljm.eWriteName(self.handle, "SYSTEM_REBOOT",
-                           0x4C4A0000)
-        else:
-            raise NoConnectionError(self.identifier)
+        self.errorCheck()
+        
+        ljm.eWriteName(self.handle, "SYSTEM_REBOOT",
+                       0x4C4A0000)
     
     """
     Method: getParams(variables)
@@ -241,16 +240,15 @@ class StarburstLJ(object):
             KeyError occurs when designated key is non-existent.
     """
     def getParams(self, variables=None):
-        if self.handle is not None:
-            varDump = {'TIMESTAMP': str(datetime.datetime.utcnow())}
-            if variables is None:
-                variables = StarburstLJ.ljVariables
-            
-            for var in variables:
-                varDump[var] = self.ljVarDict[var](self)
-            return varDump
-        else:
-            raise NoConnectionError(self.identifier)
+        self.errorCheck()
+        
+        varDump = {'TIMESTAMP': str(datetime.datetime.utcnow())}
+        if variables is None:
+            variables = StarburstLJ.ljVariables
+        
+        for var in variables:
+            varDump[var] = self.ljVarDict[var](self)
+        return varDump
             
     """
     Method: setLJName(name)
@@ -272,17 +270,28 @@ class StarburstLJ(object):
                 LabJack unit.
     """
     def setLJName(self, name):
+        self.errorCheck()
+        
         name = str(name)
         if len(name) > 49 or "." in name:
             raise TypeError("Expected a string instead of " + 
                             str(type(name)) + 
                             " with less than 49 characters and no periods.")
-        if self.handle is not None:
-            ljm.eWriteNameString(self.handle, "DEVICE_NAME_DEFAULT",
-                                 name)
-        else:
-            raise NoConnectionError(self.identifier)
         
+        ljm.eWriteNameString(self.handle, "DEVICE_NAME_DEFAULT",
+                                 name)
+            
+    """
+    Method: errorCheck()
+        Description:
+            Helper method to error check before conducting other methods.
+        Raises:
+            NoConnectionError: occurs when there is no connection to the
+                LabJack unit.
+    """
+    def errorCheck(self):
+        if self.handle is None:
+            raise NoConnectionError(self.identifier)
 
 """
 Class: LONoiseLJ extends StarburstLJ
@@ -382,14 +391,11 @@ class LONoiseLJ(StarburstLJ):
             
     """
     def setLOFreq(self, freq):
-        if self.handle is not None:
-            try:
-                LONoiseLJ.ljLODict[freq](self)
-            except KeyError:
-                raise InvalidLOFreqError()
-        else:
-            raise NoConnectionError(self.identifier)
-       
+        self.errorCheck()
+        try:
+            LONoiseLJ.ljLODict[freq](self)
+        except KeyError:
+            raise InvalidLOFreqError()
        
     """
     Method: setNoiseSourceOn
@@ -400,10 +406,9 @@ class LONoiseLJ(StarburstLJ):
                 LabJack unit.
     """
     def setNoiseSourceOn(self):
-        if self.handle is not None:
-            ljm.eWriteName(self.handle, "EIO0", 1)
-        else:
-            raise NoConnectionError(self.identifier)
+        self.errorCheck()
+        
+        ljm.eWriteName(self.handle, "EIO0", 1)
     
     """
     Method: setNoiseSourceOff
@@ -414,10 +419,9 @@ class LONoiseLJ(StarburstLJ):
                 LabJack unit.
     """
     def setNoiseSourceOff(self):
-        if self.handle is not None:
-            ljm.eWriteName(self.handle, "EIO0", 0)
-        else:
-            raise NoConnectionError(self.identifier)
+        self.errorCheck()
+            
+        ljm.eWriteName(self.handle, "EIO0", 0)
             
     """
     Method: getParams(variables)
@@ -435,23 +439,21 @@ class LONoiseLJ(StarburstLJ):
             KeyError occurs when designated key is non-existent.
     """
     def getParams(self, variables=None):
-        if self.handle is not None:
-            if variables is None:
-                variables = LONoiseLJ.ljVariables
-                
-            cpy = copy.copy(variables)
-            varDump = {}
-        
-            for var in LONoiseLJ.ljLOVariables:
-                if var in cpy:
-                    varDump[var] = self.ljLOVarDict[var](self)
-                    cpy.remove(var)
-                
-            varDump.update(super(LONoiseLJ, self).getParams(cpy))
-            return varDump
+        self.errorCheck()
             
-        else:
-            raise NoConnectionError(self.identifier)
+        if variables is None:
+            variables = LONoiseLJ.ljVariables
+            
+        cpy = copy.copy(variables)
+        varDump = {}
+    
+        for var in LONoiseLJ.ljLOVariables:
+            if var in cpy:
+                varDump[var] = self.ljLOVarDict[var](self)
+                cpy.remove(var)
+            
+        varDump.update(super(LONoiseLJ, self).getParams(cpy))
+        return varDump
             
 
 """
@@ -658,23 +660,21 @@ class AntennaLJ(StarburstLJ):
             KeyError occurs when designated key is non-existent.
     """
     def getParams(self, variables=None):
-        if self.handle is not None:
-            if variables is None:
-                variables = AntennaLJ.ljVariables
-                
-            cpy = copy.copy(variables)
-            varDump = {}
-        
-            for var in AntennaLJ.ljAVariables:
-                if var in cpy:
-                    varDump[var] = self.ljAVarDict[var](self)
-                    cpy.remove(var)
-                
-            varDump.update(super(AntennaLJ, self).getParams(cpy))
-            return varDump
+        self.errorCheck()
             
-        else:
-            raise NoConnectionError(self.identifier)
+        if variables is None:
+            variables = AntennaLJ.ljVariables
+            
+        cpy = copy.copy(variables)
+        varDump = {}
+    
+        for var in AntennaLJ.ljAVariables:
+            if var in cpy:
+                varDump[var] = self.ljAVarDict[var](self)
+                cpy.remove(var)
+            
+        varDump.update(super(AntennaLJ, self).getParams(cpy))
+        return varDump
     
     """
     Method setAttenuator(val, list)
@@ -691,14 +691,12 @@ class AntennaLJ(StarburstLJ):
             
     """
     def setAttenuator(self, level, list=["VQ","VI","HQ","HI"]):
-        if self.handle is not None:
-            newVal = self.__setUpAttenuations(level)
-                           
-            for input in list:
-                self.attDict[input](self, newVal)
-                
-        else:
-            raise NoConnectionError(self.identifier)
+        self.errorCheck()
+        
+        newVal = self.__setUpAttenuations(level)
+                       
+        for input in list:
+            self.attDict[input](self, newVal)
     
     """
     Method selectNoiseSource(list)
@@ -711,13 +709,12 @@ class AntennaLJ(StarburstLJ):
                 LabJack unit.
     """
     def selectNoiseSource(self, list=["H","V"]):
-        if self.handle is not None:
-            if "H" in list:
-                ljm.eWriteName(self.handle, "EIO1", 1)
-            if "V" in list:
-                ljm.eWriteName(self.handle, "EIO2", 1)
-        else:
-            raise NoConnectionError(self.identifier)
+        self.errorCheck()
+        
+        if "H" in list:
+            ljm.eWriteName(self.handle, "EIO1", 1)
+        if "V" in list:
+            ljm.eWriteName(self.handle, "EIO2", 1)
     
     """
     Method selectRFSource(list)
@@ -730,10 +727,9 @@ class AntennaLJ(StarburstLJ):
                 LabJack unit.
     """
     def selectRFSource(self, list=["H","V"]):
-        if self.handle is not None:
-            if "H" in list:
-                ljm.eWriteName(self.handle, "EIO1", 0)
-            if "V" in list:
-                ljm.eWriteName(self.handle, "EIO2", 0)
-        else:
-            raise NoConnectionError(self.identifier)
+        self.errorCheck()
+        
+        if "H" in list:
+            ljm.eWriteName(self.handle, "EIO1", 0)
+        if "V" in list:
+            ljm.eWriteName(self.handle, "EIO2", 0)

@@ -9,7 +9,13 @@ from labjack import ljm
 import sblj
 import ovro
 
-class TestOVROGetMonitorData(unittest.TestCase):
+"""
+TestOVROMethods Test Group Description:
+    This is a group of unit tests that test each method offered by the
+    ovro module. This group only provides for basic functionality 
+    testing.
+"""
+class TestOVROMethods(unittest.TestCase):
     """
         Monkey patching methods for LJM Library and sblj in order to unit 
         test effectively. The new method is injected in the setUp and 
@@ -19,7 +25,7 @@ class TestOVROGetMonitorData(unittest.TestCase):
     def connect(self):
         pass
         
-    def setAttenuator(self, level, list=None):
+    def errorCheck(self):
         pass
                         
     def eReadName(self, handle, name):
@@ -29,6 +35,8 @@ class TestOVROGetMonitorData(unittest.TestCase):
         return self.testValues[handle][name]
         
     def eWriteName(self, handle, name, newVal):
+        if handle is None:  
+            handle = "Antenna"
         self.testValues[handle][name] = newVal
         
     def eWriteNameString(self, handle, name, newVal):
@@ -86,33 +94,35 @@ class TestOVROGetMonitorData(unittest.TestCase):
             }
         
         self.o_connect = sblj.StarburstLJ.connect
-        self.o_setAttenuator = sblj.AntennaLJ.setAttenuator
+        self.o_errorCheck = sblj.StarburstLJ.errorCheck
         self.o_eReadName = ljm.eReadName
         self.o_eReadNameString = ljm.eReadNameString
         self.o_eWriteName = ljm.eWriteName
         self.o_eWriteNameString = ljm.eWriteNameString
         
         sblj.StarburstLJ.connect = self.connect
-        sblj.AntennaLJ.setAttenuator = self.setAttenuator
+        sblj.StarburstLJ.errorCheck = self.errorCheck
         ljm.eReadName = self.eReadName
         ljm.eReadNameString = self.eReadNameString
         ljm.eWriteName = self.eWriteName
         ljm.eWriteNameString = self.eWriteNameString
         
-        self.ovroObj = ovro.OVROStarburst("LONoise", {"Antenna": "Antenna"}, 1)
+        self.dictOfAntennas = {"Antenna": "Antenna"}
+        
+        self.ovroObj = ovro.OVROStarburst("LONoise", self.dictOfAntennas, 1)
         self.ovroObj.ljLONoise.handle = "LONoise"
         self.ovroObj.ljDictOfAntennas["Antenna"].handle = "Antenna"
         
     def tearDown(self):
         sblj.StarburstLJ.connect = self.o_connect
-        sblj.AntennaLJ.setAttenuator = self.o_setAttenuator
+        sblj.StarburstLJ.errorCheck = self.o_errorCheck
         ljm.eReadName = self.o_eReadName
         ljm.eReadNameString = self.o_eReadNameString
         ljm.eWriteName = self.o_eWriteName
         ljm.eWriteNameString = self.o_eWriteNameString
     
     """
-    Test - test_getMonitorDataReturnsCorrectValues:
+    Test - test_getMonitorData_ReturnsCorrectValues:
         Given that we call getMonitorData when a single antenna and the 
             LO noise module is supplied with the values on the pins/register
             defined in testValues,
@@ -160,9 +170,68 @@ class TestOVROGetMonitorData(unittest.TestCase):
         """
         self.assertEqual(dict["LONOISE"]["LOFREQ"], "LO_3_4GHZ")
         self.assertEqual(dict["LONOISE"]["NSSTAT"], 0)
+    
+    """
+    Test - test_selectNoiseSource:
+        Given that we select the noise source for the OVRO object,
+        Then the noise source should be turned on in the LO Noise 
+            module and all polarizations of all antennas should be 
+            switched to the noise source.
+    """
+    def test_selectNoiseSource(self):
+        self.ovroObj.selectNoiseSource()
         
+        for key in self.dictOfAntennas.keys():
+            dict = self.ovroObj.getMonitorData()
+            self.assertEqual(dict[key]["VNSSEL"], 1)
+            self.assertEqual(dict[key]["HNSSEL"], 1)
+            
+        dict = self.ovroObj.getMonitorData()
+        self.assertEqual(dict["LONOISE"]["NSSTAT"], 1)
+    
+    """
+    Test - test_selectRFSource:
+        Given that we select the RF source for the OVRO object,
+        Then the noise source should be turned off in the LO Noise 
+            module and all polarizations of all antennas should be 
+            switched to the RF source.
+    """
+    def test_selectRFSource(self):
+        self.ovroObj.selectRFSource()
+        
+        for key in self.dictOfAntennas.keys():
+            dict = self.ovroObj.getMonitorData()
+            self.assertEqual(dict[key]["VNSSEL"], 0)
+            self.assertEqual(dict[key]["HNSSEL"], 0)
+            
+        dict = self.ovroObj.getMonitorData()
+        self.assertEqual(dict["LONOISE"]["NSSTAT"], 0)
+        
+    """
+    Test - test_setToBand:
+        Given that we set the band to band 1,
+        Then the LO Frequency is at 3.4GHz, the vertical attenuators
+            are at 10dB and the horizontal attenuators are at 12dB.
+    """
+    def test_setToBand(self):
+        self.ovroObj.setToBand(1)
+        
+        dict = self.ovroObj.getMonitorData()
+        
+        self.assertEqual(dict["LONOISE"]["LOFREQ"], "LO_3_4GHZ")
+        
+        for key in self.dictOfAntennas.keys():
+            dict = self.ovroObj.getMonitorData()
+            self.assertEqual(dict[key]["VQATTEN"], 10)
+            self.assertEqual(dict[key]["VIATTEN"], 10)
+            self.assertEqual(dict[key]["HQATTEN"], 12)
+            self.assertEqual(dict[key]["HIATTEN"], 12)
+        
+"""
+Main Method
+"""
 if __name__ == '__main__':
-    testGroups = [TestOVROGetMonitorData]
+    testGroups = [TestOVROMethods]
     for tG in testGroups:
         print "\nTesting: " + str(tG.__name__)
         suite = unittest.TestLoader().loadTestsFromTestCase(

@@ -133,17 +133,6 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         dict = self.lj.getParams(["POW_N5V"])
         self.assertEqual(dict["POW_N5V"], -5)
         self.assertTrue(dict.has_key("TIMESTAMP"))
-
-    """
-    Test - test_name:
-        Given that the LabJack's name is "MockLabJack",
-        Then getParams(["NAME"]) returns "MockLabJack",
-        And a time stamp is returned.
-    """
-    def test_name(self):
-        dict = self.lj.getParams(["NAME"])
-        self.assertEqual(dict["NAME"], "MockLabJack")
-        self.assertTrue(dict.has_key("TIMESTAMP"))
     
     """
     Test - test_s5V:
@@ -154,6 +143,17 @@ class TestGenericLabJackGetParams(unittest.TestCase):
     def test_s5V(self):
         dict = self.lj.getParams(["POW_S5V"])
         self.assertEqual(dict["POW_S5V"], 5)
+        self.assertTrue(dict.has_key("TIMESTAMP"))
+    
+    """
+    Test - test_name:
+        Given that the LabJack's name is "MockLabJack",
+        Then getParams(["NAME"]) returns "MockLabJack",
+        And a time stamp is returned.
+    """
+    def test_name(self):
+        dict = self.lj.getParams(["NAME"])
+        self.assertEqual(dict["NAME"], "MockLabJack")
         self.assertTrue(dict.has_key("TIMESTAMP"))
         
     """
@@ -166,6 +166,7 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         dict = self.lj.getParams(["SERIAL"])
         self.assertEqual(dict["SERIAL"], 1000)
         self.assertTrue(dict.has_key("TIMESTAMP"))
+    
     
 """
 TestGenericLabJackConnections Test Group Description:
@@ -657,7 +658,10 @@ class TestAntennaLabJackModule(unittest.TestCase):
         self.lj.disconnect()
         self.assertRaises(sblj.NoConnectionError, self.lj.getParams)
         
-    
+        
+"""
+Main Method
+"""    
 if __name__ == '__main__':
     testGroups = [TestGenericLabJackGetParams, TestGenericLabJackConnections,
                   TestGenericLabJackReboot, TestGenericLabJackName, 
