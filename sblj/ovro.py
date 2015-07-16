@@ -173,3 +173,13 @@ class OVROStarburst(object):
         
         for lj in antennas:
             self.ljDictOfAntennas[lj].deltaAttenuator(delta)
+    
+    """
+    Method: endConnection()
+        Description:
+            Ends connections to all LabJacks in the system.
+    """
+    def endConnection(self):
+        self.ljLONoise.disconnect()
+        for lj in self.ljDictOfAntennas.values():
+            lj.diconnect()
