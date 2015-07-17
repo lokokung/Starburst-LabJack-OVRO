@@ -8,6 +8,7 @@ import unittest
 from labjack import ljm
 import sblj
 import ovro
+import pickle
 
 """
 TestOVROMethods Test Group Description:
@@ -94,6 +95,10 @@ class TestOVROMethods(unittest.TestCase):
                         'DEVICE_NAME_DEFAULT': 'MockLabJack',
                         'SERIAL_NUMBER': 1000}
             }
+            
+        self.LOConstantNames = {value: name for name, 
+                                value in vars(sblj.LOFreqConstants).items() 
+                                if name.isupper()}
         
         self.o_connect = sblj.StarburstLJ.connect
         self.o_errorCheck = sblj.StarburstLJ.errorCheck
@@ -216,18 +221,24 @@ class TestOVROMethods(unittest.TestCase):
             are at 10dB and the horizontal attenuators are at 12dB.
     """
     def test_setToBand(self):
+    
         self.ovroObj.setToBand(1)
-        
         dict = self.ovroObj.getMonitorData()
         
-        self.assertEqual(dict["LONOISE"]["LOFREQ"], "LO_3_4GHZ")
+        with open(".bands", "r") as file:
+            check = pickle.load(file)
+            attens = check[1]["ATTEN"]
+            lofrq = check[1]["LOFREQ"]
         
-        for key in self.dictOfAntennas.keys():
-            dict = self.ovroObj.getMonitorData()
-            self.assertEqual(dict[key]["VQATTEN"], 10)
-            self.assertEqual(dict[key]["VIATTEN"], 10)
-            self.assertEqual(dict[key]["HQATTEN"], 12)
-            self.assertEqual(dict[key]["HIATTEN"], 12)
+            self.assertEqual(dict["LONOISE"]["LOFREQ"], 
+                             self.LOConstantNames[lofrq])
+        
+            for key in self.dictOfAntennas.keys():
+                dict = self.ovroObj.getMonitorData()
+                self.assertEqual(dict[key]["VQATTEN"], attens["VQ"])
+                self.assertEqual(dict[key]["VIATTEN"], attens["VI"])
+                self.assertEqual(dict[key]["HQATTEN"], attens["HQ"])
+                self.assertEqual(dict[key]["HIATTEN"], attens["HI"])
     
     """
     Test - test_setToBandNonexistantBandRaisesError:
