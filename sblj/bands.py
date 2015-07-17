@@ -13,9 +13,20 @@ SEPARATOR = "=================================================="
 LOFREQS = {value: name for name, value in vars(LOFreqConstants).items() 
            if name.isupper()}
 
+"""
+Method: clrScreen()
+    Description: 
+        Method that clears the screen on the shell prompt.
+"""
 def clrScreen():
     tmp = sp.call('cls', shell = True)
-    
+
+"""
+Method: welcomeScreen()
+    Description:
+        Method that produces a welcome message at the top of the 
+        shell prompt.
+"""
 def welcomeScreen():
     clrScreen()
     print SEPARATOR
@@ -24,7 +35,12 @@ def welcomeScreen():
     print "options by typing in the number next to the" 
     print "option."
     print SEPARATOR
-    
+
+"""
+Method: listBands()
+    Description:
+        Method that lists all existing band settings in the .bands file.
+"""
 def listBands():
     with open(".bands", "r") as file:
         dict = pickle.load(file)
@@ -38,7 +54,13 @@ def listBands():
             print "HI Attenuation: " + str(val["ATTEN"]["HI"])
         print SEPARATOR
         optionScreen()
-        
+
+"""
+Method: addBand()
+    Description:
+        Method that prompts the user in order to help either modify an 
+        existing band setting or to create a new one. 
+"""
 def addBand():
     dict = None
     with open(".bands", "r") as file:
@@ -117,7 +139,13 @@ def addBand():
             done = None
         else:
             pass
-            
+"""
+Method: removeBand()
+    Description: 
+        Method to assist users in removing old or invalid band settings. 
+        Has a built in confirmation in order to make sure that deletions
+        only occur if meant to be.
+"""
 def removeBand():
     dict = None
     with open(".bands", "r") as file:
@@ -165,7 +193,16 @@ def removeBand():
         else:
             welcomeScreen()
             optionScreen()
-    
+
+"""
+Method: getDouble(polarComp)
+    Description:
+        Helper method to get attenuation values for the different 
+        component.
+    Arguments:
+        polarComp: string to indicate which polarization/component that
+            the returned value is used for.
+"""
 def getDouble(polarComp):
     val = None
     while val is None:
@@ -182,7 +219,13 @@ def getDouble(polarComp):
             print "Please enter a valid attenuation value."
             
     return val
-            
+"""
+Method: formatData()
+    Description:
+        Helper method to format all the data that is collected in addBand()
+        into the standard dictionary format to add into the .bands setting 
+        file.
+"""            
 def formatData(bandDescr, loFreq, vq, vi, hq, hi):
     dict = {"LOFREQ": loFreq,
             "ATTEN": {"VQ": vq,
@@ -191,10 +234,22 @@ def formatData(bandDescr, loFreq, vq, vi, hq, hi):
                       "HI": hi}, 
             "DESCR": bandDescr}
     return dict
-                
+
+"""
+Method: exit()
+    Description:
+        Method that does nothing but makes it easier to understand the code
+        when reading through.
+"""
 def exit():
     pass
-    
+"""
+Method: optionScreen()
+    Description:
+        Method that generates the main menu. This method is also in charge of 
+        getting the chosen option and redirecting to the correct procedures
+        using a map.
+"""
 def optionScreen():
     functionMap = {1: listBands,
                    2: addBand,
