@@ -42,8 +42,7 @@ class OVROStarburst(object):
         Default dictionary for band levels.
     """
     bandDictionary = {1: {"LOFREQ": 0,
-                          "ATTEN": [(10, ["VQ", "VI"]),
-                                    (12, ["HQ", "HI"]) ], 
+                          "ATTEN": {"VQ": 10, "VI": 10, "HQ": 12, "HI": 12}, 
                           "DESCR": "Default band" } }
                                     
     def __init__(self, noiseLOID, dictOfAntennaIDs):
@@ -147,8 +146,8 @@ class OVROStarburst(object):
         self.ljLONoise.setLOFreq(ref["LOFREQ"])
         
         for lj in antennas:
-            for val, list in ref["ATTEN"]:
-                self.ljDictOfAntennas[lj].setAttenuator(val, list)
+            for comp, val in ref["ATTEN"].items():
+                self.ljDictOfAntennas[lj].setAttenuator(val, [comp])
     
     """
     Method: alterAntByDelta(delta, antennas)
