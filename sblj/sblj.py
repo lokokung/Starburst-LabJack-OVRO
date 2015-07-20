@@ -132,11 +132,11 @@ class StarburstLJ(object):
         else: 
             self.handle = handle
     
-    """
-        Private getter methods to retrieve specific parameters. Do NOT use 
-        these methods without its wrapper getParams since these 
-        are not error checked.
-    """
+    
+    # Private getter methods to retrieve specific parameters. Do NOT use 
+    # these methods without its wrapper getParams since these 
+    # are not error checked.
+    
     def __getLJTemp(self):
         temp = ljm.eReadName(self.handle, "TEMPERATURE_DEVICE_K")
         return temp
@@ -168,10 +168,9 @@ class StarburstLJ(object):
         serial = ljm.eReadName(self.handle, "SERIAL_NUMBER")
         return serial
         
-    """
-        Dictionary lookup for parameters (Placed here because the 
-        corresponding methods that are pointed to must be defined first.)
-    """
+    # Dictionary lookup for parameters (Placed here because the 
+    # corresponding methods that are pointed to must be defined first.)
+    
     ljVarDict = {'LJTEMP': __getLJTemp, 'LJAIRTEMP': __getLJAirTemp,
                  'POW_24V': __get24V, 'POW_15V': __get15V, 
                  'POW_12V': __get12V, 'POW_5V': __get5V, 'POW_N5V': __getN5V,
@@ -319,21 +318,16 @@ class LONoiseLJ(StarburstLJ):
                  deviceType="T7", handle=None):
         super(LONoiseLJ, self).__init__(identifier, connectionType,
                                         deviceType, handle)
-        
-        """
-        LabJack Parameters across LO/Noise Source modules
-            LOFREQ: Current set LO setting.
-            NSSTATUS: On/Off status of noise source (0=off, 1=on).
-        """
+                                        
         self.LOConstantNames = {value: name for name, 
                                 value in vars(LOFreqConstants).items() 
                                 if name.isupper()}
                                         
-    """
-        Private getter methods to retrieve specific parameters. Do NOT use 
-        these methods without its wrapper getParamsiables since these 
-        are not error checked.
-    """
+    
+    # Private getter methods to retrieve specific parameters. Do NOT use 
+    # these methods without its wrapper getParamsiables since these 
+    # are not error checked.
+        
     def __getLOFreq(self):
         rightBit = ljm.eReadName(self.handle, "EIO3")
         leftBit = ljm.eReadName(self.handle, "EIO4")
@@ -345,17 +339,17 @@ class LONoiseLJ(StarburstLJ):
         status = ljm.eReadName(self.handle, "EIO0")
         return status
         
-    """
-        Dictionary lookup for parameters (Placed here because the 
-        corresponding methods that are pointed to must be defined first.)
-    """
+
+    # Dictionary lookup for parameters (Placed here because the 
+    # corresponding methods that are pointed to must be defined first.)
+
     ljLOVarDict = {'LOFREQ': __getLOFreq, 'NSSTAT': __getNSStatus}
 
-    """
-        Private LO frequency setting methods. Do NOT call these methods 
-        directly, instead, use the setLOFreq method. These methods are
-        not error checked. 
-    """
+
+    # Private LO frequency setting methods. Do NOT call these methods 
+    # directly, instead, use the setLOFreq method. These methods are
+    # not error checked. 
+
     def __setFreq(self, leftBit, rightBit):
         ljm.eWriteName(self.handle, "EIO3", rightBit)
         ljm.eWriteName(self.handle, "EIO4", leftBit)   
@@ -368,9 +362,8 @@ class LONoiseLJ(StarburstLJ):
     def __15_5GHZ(self):
         self.__setFreq(1, 1)
     
-    """
-        Dictionary lookup for LO settings and corresponding methods.
-    """
+    # Dictionary lookup for LO settings and corresponding methods.
+
     ljLODict = {LOFreqConstants.LO_3_4GHZ: __3_4GHZ, 
                 LOFreqConstants.LO_7_5GHZ: __7_5GHZ,
                 LOFreqConstants.LO_11_5GHZ: __11_5GHZ, 
@@ -514,19 +507,18 @@ class AntennaLJ(StarburstLJ):
                  deviceType="T7", handle=None):
         super(AntennaLJ, self).__init__(identifier, connectionType,
                                         deviceType, handle)
-        
-        """
-        Ghost copy of attenuations for each component
-        """
+
+        # Ghost copy of attenuations for each component
+
         self.allAtt = {"VQ": 31.5, "VI": 31.5, "HQ": 31.5, "HI": 31.5}
         
         self.setAttenuator(31.5)
         
-    """
-        Private attenuator methods. Do NOT call these methods directly, 
-        instead, use the setAttenuator methods to do so. (These methods
-        are not error checked.)
-    """
+
+    # Private attenuator methods. Do NOT call these methods directly, 
+    # instead, use the setAttenuator methods to do so. (These methods
+    # are not error checked.)
+
     def __setUpAttenuations(self, val):
         attDict = {1: "FIO1", 2: "FIO2", 3: "FIO3", 4: "FIO4", 5: "FIO5"}
         
@@ -570,20 +562,18 @@ class AntennaLJ(StarburstLJ):
         ljm.eWriteName(self.handle, "CIO3", 1)
         self.__turnOffAllLatches()
         self.allAtt["HI"] = newVal
-        
-    """
-        Dictionary for attenuator method setups.
-    """
+
+        # Dictionary for attenuator method setups.
+
     attDict = {'VQ': __VQAttenLatch, 
                'VI': __VIAttenLatch,  
                'HQ': __HQAttenLatch, 
                'HI': __HIAttenLatch}
+
+    # Private getter methods to retrieve specific parameters. Do NOT use 
+    # these methods without its wrapper getParamsiables since these 
+    # are not error checked.
         
-    """
-        Private getter methods to retrieve specific parameters. Do NOT use 
-        these methods without its wrapper getParamsiables since these 
-        are not error checked.
-    """
     def __getVQPow(self):
         pow = ljm.eReadName(self.handle, "AIN3")
         pow = 24 - 40 * pow
@@ -630,11 +620,10 @@ class AntennaLJ(StarburstLJ):
     def __getHNoiseSel(self):
         sel = ljm.eReadName(self.handle, "EIO1")
         return sel
-        
-    """
-        Dictionary lookup for parameters (Placed here because the 
-        corresponding methods that are pointed to must be defined first.)
-    """
+
+    # Dictionary lookup for parameters (Placed here because the 
+    # corresponding methods that are pointed to must be defined first.)
+
     ljAVarDict = {'VQPOW': __getVQPow, 'VIPOW': __getVIPow, 
                   'HQPOW': __getHQPow, 'HIPOW': __getHIPow,
                   'VQTEMP': __getVQTemp, 'VITEMP': __getVITemp,

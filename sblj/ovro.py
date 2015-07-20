@@ -39,9 +39,8 @@ Class: OVROStarburst extends object
 """
 class OVROStarburst(object):
 
-    """
-        Default dictionary for band levels.
-    """
+    # Default dictionary for band levels.
+
     bandDictionary = {1: {"LOFREQ": 0,
                           "ATTEN": {"VQ": 10, "VI": 10, "HQ": 12, "HI": 12}, 
                           "DESCR": "Default band" } }

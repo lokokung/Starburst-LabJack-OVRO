@@ -19,12 +19,11 @@ TestOVROMethods Test Group Description:
     Test Count: 6
 """
 class TestOVROMethods(unittest.TestCase):
-    """
-        Monkey patching methods for LJM Library and sblj in order to unit 
-        test effectively. The new method is injected in the setUp and 
-        removed in the tearDown to allow for running of individual test 
-        cases in this group.
-    """
+    # Monkey patching methods for LJM Library and sblj in order to unit 
+    # test effectively. The new method is injected in the setUp and 
+    # removed in the tearDown to allow for running of individual test 
+    # cases in this group.
+        
     def connect(self):
         pass
         
@@ -46,10 +45,9 @@ class TestOVROMethods(unittest.TestCase):
         self.testValues[handle][name] = newVal
         
     def setUp(self):
-        """
-            Dictionary of values that the mock LabJack will return for 
-            call with names corresponding to the keys of the dictionary.
-        """
+        # Dictionary of values that the mock LabJack will return for 
+        # call with names corresponding to the keys of the dictionary.
+
         self.testValues = {
             'LONoise': {'TEMPERATURE_DEVICE_K': 300,
                         'TEMPERATURE_AIR_K': 298,
@@ -138,9 +136,7 @@ class TestOVROMethods(unittest.TestCase):
     def test_getMonitorDataReturnsCorrectValues(self):
         dict = self.ovroObj.getMonitorData()
         
-        """
-            Assertions for generic LabJacks.
-        """
+        # Assertions for generic LabJacks.
         for id in ["A", "B", "LONOISE"]:
             self.assertEqual(dict[id]["NAME"], "MockLabJack")
             self.assertEqual(dict[id]["LJTEMP"], 300)
@@ -153,9 +149,7 @@ class TestOVROMethods(unittest.TestCase):
             self.assertEqual(dict[id]["POW_S5V"], 5)
             self.assertEqual(dict[id]["SERIAL"], 1000)
         
-        """
-            Assertions for the antennas.
-        """
+        # Assertions for the antennas.
         for id in ["A", "B"]:
             self.assertEqual(dict[id]["HIPOW"], -24)
             self.assertEqual(dict[id]["HQPOW"], -24)
@@ -172,9 +166,7 @@ class TestOVROMethods(unittest.TestCase):
             self.assertEqual(dict[id]["VIATTEN"], 31.5)
             self.assertEqual(dict[id]["VQATTEN"], 31.5)
         
-        """
-            Assertions for the LO Noise module.
-        """
+        # Assertions for the LO Noise module.
         self.assertEqual(dict["LONOISE"]["LOFREQ"][0], "LO_3_4GHZ")
         self.assertEqual(dict["LONOISE"]["LOFREQ"][1], 0)
         self.assertEqual(dict["LONOISE"]["NSSTAT"], 0)
@@ -265,9 +257,8 @@ class TestOVROMethods(unittest.TestCase):
             self.assertEqual(dict[key]["HQATTEN"], 21.5)
             self.assertEqual(dict[key]["HIATTEN"], 21.5)
     
-"""
-Main Method
-"""
+
+# Main Method
 if __name__ == '__main__':
     testGroups = [TestOVROMethods]
     for tG in testGroups:

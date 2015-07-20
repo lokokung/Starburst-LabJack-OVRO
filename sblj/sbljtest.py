@@ -17,12 +17,11 @@ TestGenericLabJackGetParams Test Group Description:
     Test Count: 10
 """
 class TestGenericLabJackGetParams(unittest.TestCase):    
-    """
-        Monkey patching methods for LJM Library in order to unit test 
-        effectively. The new method is injected in the setUp and removed 
-        in the tearDown to allow for running of individual test cases in 
-        this group.
-    """
+    # Monkey patching methods for LJM Library in order to unit test 
+    # effectively. The new method is injected in the setUp and removed 
+    # in the tearDown to allow for running of individual test cases in 
+    # this group.
+    
     def eReadName(self, handle, name):
         return self.mockLabJackValues[name]
         
@@ -30,10 +29,9 @@ class TestGenericLabJackGetParams(unittest.TestCase):
         return self.mockLabJackValues[name]
     
     def setUp(self):
-        """
-            Dictionary of values that the mock LabJack will return for 
-            call with names corresponding to the keys of the dictionary.
-        """
+        # Dictionary of values that the mock LabJack will return for 
+        # call with names corresponding to the keys of the dictionary.
+        
         self.mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
                                   'TEMPERATURE_AIR_K': 298,
                                   'AIN4': 8,
@@ -216,12 +214,11 @@ TestGenericLabJackName Test Group Description:
     Test Count: 4
 """
 class TestGenericLabJackName(unittest.TestCase):
-    """
-        Monkey patching methods for LJM Library in order to unit test 
-        effectively. The new method is injected in the setUp and removed 
-        in the tearDown to allow for running of individual test cases in 
-        this group.
-    """
+    # Monkey patching methods for LJM Library in order to unit test 
+    # effectively. The new method is injected in the setUp and removed 
+    # in the tearDown to allow for running of individual test cases in 
+    # this group.
+        
     def eReadNameString(self, handle, name):
         return self.ljName
         
@@ -293,12 +290,11 @@ TestGenericLabJackReboot Test Group Description:
     Test Count: 1
 """
 class TestGenericLabJackReboot(unittest.TestCase):
-    """
-        Monkey patching methods for LJM Library in order to unit test 
-        effectively. The new method is injected in the setUp and removed 
-        in the tearDown to allow for running of individual test cases in 
-        this group.
-    """
+    # Monkey patching methods for LJM Library in order to unit test 
+    # effectively. The new method is injected in the setUp and removed 
+    # in the tearDown to allow for running of individual test cases in 
+    # this group.
+        
     def eWriteName(self, handle, name, newVal):
         if name is "SYSTEM_REBOOT":
             self.reboot = newVal
@@ -328,12 +324,11 @@ TestLONoiseLabJackModule Test Group Description:
     Test Count: 4
 """
 class TestLONoiseLabJackModule(unittest.TestCase):
-    """
-        Monkey patching methods for LJM Library in order to unit test 
-        effectively. The new method is injected in the setUp and removed 
-        in the tearDown to allow for running of individual test cases in 
-        this group.
-    """
+    # Monkey patching methods for LJM Library in order to unit test 
+    # effectively. The new method is injected in the setUp and removed 
+    # in the tearDown to allow for running of individual test cases in 
+    # this group.
+        
     def eReadName(self, handle, name):
         return self.mockLabJackValues[name]
         
@@ -347,10 +342,9 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         self.mockLabJackValues[name] = newVal
     
     def setUp(self):
-        """
-            Dictionary of values that the mock LabJack will return for 
-            call with names corresponding to the keys of the dictionary.
-        """
+        # Dictionary of values that the mock LabJack will return for 
+        # call with names corresponding to the keys of the dictionary.
+            
         self.mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
                                   'TEMPERATURE_AIR_K': 298,
                                   'AIN4': 8,
@@ -485,12 +479,11 @@ TestAntennaLabJackModule Test Group Description:
     Test Count: 5
 """    
 class TestAntennaLabJackModule(unittest.TestCase):
-    """
-        Monkey patching methods for LJM Library in order to unit test 
-        effectively. The new method is injected in the setUp and removed 
-        in the tearDown to allow for running of individual test cases in 
-        this group.
-    """
+    # Monkey patching methods for LJM Library in order to unit test 
+    # effectively. The new method is injected in the setUp and removed 
+    # in the tearDown to allow for running of individual test cases in 
+    # this group.
+        
     def eReadName(self, handle, name):
         return self.mockLabJackValues[name]
         
@@ -504,10 +497,9 @@ class TestAntennaLabJackModule(unittest.TestCase):
         self.mockLabJackValues[name] = newVal
     
     def setUp(self):
-        """
-            Dictionary of values that the mock LabJack will return for 
-            call with names corresponding to the keys of the dictionary.
-        """
+        # Dictionary of values that the mock LabJack will return for 
+        # call with names corresponding to the keys of the dictionary.
+            
         self.mockLabJackValues = {'TEMPERATURE_DEVICE_K': 300,
                                   'TEMPERATURE_AIR_K': 298,
                                   'AIN0': 1.2,
@@ -594,37 +586,27 @@ class TestAntennaLabJackModule(unittest.TestCase):
             larger than the given value if the value is less than 31.5
     """
     def test_setAttenuatorSetsValueCorrectly(self):
-        """
-            Check that we are always rounding up.
-        """
+        # Check that we are always rounding up.
         self.lj.setAttenuator(10.01, ["VQ"])
         dict = self.lj.getParams()
         self.assertEqual(dict["VQATTEN"], 10.5)
         
-        """
-            Check that we do not round if not necessary.
-        """
+        # Check that we do not round if not necessary.
         self.lj.setAttenuator(9, ["HQ"])
         dict = self.lj.getParams()
         self.assertEqual(dict["HQATTEN"], 9)
         
-        """
-            Check that large values cap at 31.5
-        """
+        # Check that large values cap at 31.5
         self.lj.setAttenuator(100, ["HI"])
         dict = self.lj.getParams()
         self.assertEqual(dict["HIATTEN"], 31.5)
         
-        """
-            Check that 0.5 works.
-        """
+        # Check that 0.5 works.
         self.lj.setAttenuator(0.5, ["VI"])
         dict = self.lj.getParams()
         self.assertEqual(dict["VIATTEN"], 0.5)
         
-        """
-            Check that negatives become 0.
-        """
+        # Check that negatives become 0.
         self.lj.setAttenuator(-10, ["VI"])
         dict = self.lj.getParams()
         self.assertEqual(dict["VIATTEN"], 0)
@@ -678,9 +660,7 @@ class TestAntennaLabJackModule(unittest.TestCase):
         self.assertRaises(sblj.NoConnectionError, self.lj.getParams)
         
         
-"""
-Main Method
-"""    
+# Main Method
 if __name__ == '__main__':
     testGroups = [TestGenericLabJackGetParams, TestGenericLabJackConnections,
                   TestGenericLabJackReboot, TestGenericLabJackName, 
