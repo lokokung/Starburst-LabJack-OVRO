@@ -5,7 +5,7 @@
 """
 
 from labjack import ljm
-import datetime
+import time
 import copy
 import math
 
@@ -242,7 +242,7 @@ class StarburstLJ(object):
     def getParams(self, variables=None):
         self.errorCheck()
         
-        varDump = {'TIMESTAMP': str(datetime.datetime.utcnow())}
+        varDump = {'TIMESTAMP': time.time()}
         if variables is None:
             variables = StarburstLJ.ljVariables
         

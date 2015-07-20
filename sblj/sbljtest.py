@@ -398,7 +398,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         
         self.assertEqual(self.mockLabJackValues["EIO4"], 0)
         self.assertEqual(self.mockLabJackValues["EIO3"], 0)
-        self.assertEqual("LO_3_4GHZ", dict["LOFREQ"])
+        self.assertEqual("LO_3_4GHZ", dict["LOFREQ"][0])
         
         """
             Testing 7.5GHz.
@@ -408,7 +408,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         
         self.assertEqual(self.mockLabJackValues["EIO4"], 0)
         self.assertEqual(self.mockLabJackValues["EIO3"], 1)
-        self.assertEqual("LO_7_5GHZ", dict["LOFREQ"])
+        self.assertEqual("LO_7_5GHZ", dict["LOFREQ"][0])
         
         """
             Testing 11.5GHz.
@@ -418,7 +418,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         
         self.assertEqual(self.mockLabJackValues["EIO4"], 1)
         self.assertEqual(self.mockLabJackValues["EIO3"], 0)
-        self.assertEqual("LO_11_5GHZ", dict["LOFREQ"])
+        self.assertEqual("LO_11_5GHZ", dict["LOFREQ"][0])
         
         """
             Testing 15.5GHz.
@@ -428,7 +428,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         
         self.assertEqual(self.mockLabJackValues["EIO4"], 1)
         self.assertEqual(self.mockLabJackValues["EIO3"], 1)
-        self.assertEqual("LO_15_5GHZ", dict["LOFREQ"])
+        self.assertEqual("LO_15_5GHZ", dict["LOFREQ"][0])
     
     """
     Test - test_onOffNoiseSource:
