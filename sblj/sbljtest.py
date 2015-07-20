@@ -459,7 +459,7 @@ class TestLONoiseLabJackModule(unittest.TestCase):
         self.assertEqual(dict["NAME"], "MockLabJack")
         self.assertEqual(dict["LJTEMP"], 300)
         
-        self.assertEqual(dict["LOFREQ"], "LO_3_4GHZ")
+        self.assertEqual(dict["LOFREQ"][0], "LO_3_4GHZ")
         self.assertEqual(dict["NSSTAT"], 0)
     
     """

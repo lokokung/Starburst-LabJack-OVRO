@@ -26,11 +26,12 @@ Class: OVROStarburst extends object
         Custom object that represents the OVRO system of antennas and 
         necessary equipment. 
     Arguments:
-        NoiseLOID: identifier string for the LabJack corresponding to the
+        noiseLOID: identifier string for the LabJack corresponding to the
             LO and Noise Source system. 
-        dictOfAntennaIDs: dictionary with the keys being a way to reference
-            the different antennas and the values being an identifier string
-            to the LabJack corresponding to the antenna.
+        antennaA: identifier string for the LabJack corresponding to the 
+            first antenna.
+        antennaB: identifier string for the LabJack corresponding to the 
+            second antenna.
     Raises:
         UnknownDeviceError: occurs when device description such as 
                 identifier, deviceType, or connectionType, do not point to a
@@ -45,15 +46,16 @@ class OVROStarburst(object):
                           "ATTEN": {"VQ": 10, "VI": 10, "HQ": 12, "HI": 12}, 
                           "DESCR": "Default band" } }
                                     
-    def __init__(self, noiseLOID, dictOfAntennaIDs):
+    def __init__(self, noiseLOID, antennaA=None, antennaB=None):
         self.noiseLOID = noiseLOID
-        self.dictOfAntennaIDs = copy.copy(dictOfAntennaIDs)
+        self.antennaA = antennaA
+        self.antennaB = antennaB
         
         self.ljLONoise = sblj.LONoiseLJ(self.noiseLOID)
-        
-        self.ljDictOfAntennas = {}
-        for key, value in self.dictOfAntennaIDs.items():
-            self.ljDictOfAntennas[key] = sblj.AntennaLJ(value)
+        if antennaA is not None:
+            self.ljA = sblj.AntennaLJ(self.antennaA)
+        if antennaB is not None:
+            self.ljB = sblj.AntennaLJ(self.antennaB)
             
         try:
             with open(".bands", "r") as file:
@@ -69,7 +71,7 @@ class OVROStarburst(object):
             Query to the OVRO LabJacks to dump all data concerning the 
             system. The data is returned as a dictionary of dictionaries
             where the keys are "LONOISE" for the LO Noise module and 
-            the given keys from dictOfAntennaIDs for the Antennas. The 
+            "A" and "B" for the corresponding antennas (A and B). The 
             dictionaries inside are keyed by the parameters described
             under the sblj.py for LONoiseLJ and AntennaLJ.
         Raises:
@@ -80,8 +82,10 @@ class OVROStarburst(object):
         varDump = {}
         varDump["LONOISE"] = self.ljLONoise.getParams()
         
-        for key, lj in self.ljDictOfAntennas.items():
-            varDump[key] = lj.getParams()
+        if self.antennaA is not None:
+            varDump["A"] = self.ljA.getParams()
+        if self.antennaB is not None:
+            varDump["B"] = self.ljB.getParams()
         
         return varDump
     
@@ -97,8 +101,10 @@ class OVROStarburst(object):
     def selectNoiseSource(self):
         self.ljLONoise.setNoiseSourceOn()
         
-        for lj in self.ljDictOfAntennas.values():
-            lj.selectNoiseSource()
+        if self.antennaA is not None:
+            self.ljA.selectNoiseSource()
+        if self.antennaB is not None:
+            self.ljB.selectNoiseSource()
     
     """
     Method: selectRFSource()
@@ -112,8 +118,10 @@ class OVROStarburst(object):
     def selectRFSource(self):
         self.ljLONoise.setNoiseSourceOff()
         
-        for lj in self.ljDictOfAntennas.values():
-            lj.selectRFSource()
+        if self.antennaA is not None:
+            self.ljA.selectRFSource()
+        if self.antennaB is not None:
+            self.ljB.selectRFSource()
     
     """
     Method: setToBand(band, antennas)
@@ -124,7 +132,7 @@ class OVROStarburst(object):
             band: band setting as defined in .bands file. (This can be edited
                 using bands.py.)
             antennas: list of keys to antennas that the attenuation changes
-                should apply to.
+                should apply to, valid keys are "A" and "B".
         Raises:
             InvalidBandError: occurs when the .bands setting does not have 
                 values for a given band.
@@ -133,10 +141,7 @@ class OVROStarburst(object):
             KeyError: occurs when a key in antennas does not match to any 
                 AntennaLJ objects.
     """
-    def setToBand(self, band, antennas=None):
-        if antennas is None:
-            antennas = self.ljDictOfAntennas.keys()
-            
+    def setToBand(self, band, antennas=["A", "B"]):
         ref = {}
         try:
             ref = self.bands[band]
@@ -145,9 +150,13 @@ class OVROStarburst(object):
             
         self.ljLONoise.setLOFreq(ref["LOFREQ"])
         
-        for lj in antennas:
+        if "A" in antennas and self.antennaA is not None:
             for comp, val in ref["ATTEN"].items():
-                self.ljDictOfAntennas[lj].setAttenuator(val, [comp])
+                self.ljA.setAttenuator(val, [comp])
+        
+        if "B" in antennas and self.antennaB is not None:
+            for comp, val in ref["ATTEN"].items():
+                self.ljB.setAttenuator(val, [comp])
     
     """
     Method: alterAntByDelta(delta, antennas)
@@ -157,7 +166,7 @@ class OVROStarburst(object):
         Parameters:
             delta: amount to change the attenuations by.
             antennas: list of keys to antennas that the attenuation changes
-                should apply to.
+                should apply to, valid keys are "A" and "B".
         Raises:
             InvalidBandError: occurs when the .bands setting does not have 
                 values for a given band.
@@ -166,12 +175,12 @@ class OVROStarburst(object):
             KeyError: occurs when a key in antennas does not match to any 
                 AntennaLJ objects.
     """
-    def alterAntByDelta(self, delta, antennas=None):
-        if antennas is None:
-            antennas = self.ljDictOfAntennas.keys()
+    def alterAntByDelta(self, delta, antennas=["A", "B"]):
+        if "A" in antennas and self.antennaA is not None:
+            self.ljA.deltaAttenuator(delta)
         
-        for lj in antennas:
-            self.ljDictOfAntennas[lj].deltaAttenuator(delta)
+        if "B" in antennas and self.antennaB is not None:
+            self.ljB.deltaAttenuator(delta)
     
     """
     Method: endConnection()
@@ -180,5 +189,5 @@ class OVROStarburst(object):
     """
     def endConnection(self):
         self.ljLONoise.disconnect()
-        for lj in self.ljDictOfAntennas.values():
-            lj.diconnect()
+        self.ljA.disconnect()
+        self.ljB.disconnect()

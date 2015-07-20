@@ -114,11 +114,10 @@ class TestOVROMethods(unittest.TestCase):
         ljm.eWriteName = self.eWriteName
         ljm.eWriteNameString = self.eWriteNameString
         
-        self.dictOfAntennas = {"Antenna": "Antenna"}
-        
-        self.ovroObj = ovro.OVROStarburst("LONoise", self.dictOfAntennas)
+        self.ovroObj = ovro.OVROStarburst("LONoise", "Antenna", "Antenna")
         self.ovroObj.ljLONoise.handle = "LONoise"
-        self.ovroObj.ljDictOfAntennas["Antenna"].handle = "Antenna"
+        self.ovroObj.ljA.handle = "Antenna"
+        self.ovroObj.ljB.handle = "Antenna"
         
     def tearDown(self):
         sblj.StarburstLJ.connect = self.o_connect
@@ -142,7 +141,7 @@ class TestOVROMethods(unittest.TestCase):
         """
             Assertions for generic LabJacks.
         """
-        for id in ["Antenna", "LONOISE"]:
+        for id in ["A", "B", "LONOISE"]:
             self.assertEqual(dict[id]["NAME"], "MockLabJack")
             self.assertEqual(dict[id]["LJTEMP"], 300)
             self.assertEqual(dict[id]["LJAIRTEMP"], 298)
@@ -155,27 +154,29 @@ class TestOVROMethods(unittest.TestCase):
             self.assertEqual(dict[id]["SERIAL"], 1000)
         
         """
-            Assertions for the antenna.
+            Assertions for the antennas.
         """
-        self.assertEqual(dict["Antenna"]["HIPOW"], -24)
-        self.assertEqual(dict["Antenna"]["HQPOW"], -24)
-        self.assertEqual(dict["Antenna"]["VIPOW"], -24)
-        self.assertEqual(dict["Antenna"]["VQPOW"], -24)
-        self.assertEqual(dict["Antenna"]["HITEMP"], 211)
-        self.assertEqual(dict["Antenna"]["HQTEMP"], 211)
-        self.assertEqual(dict["Antenna"]["VITEMP"], 211)
-        self.assertEqual(dict["Antenna"]["VQTEMP"], 211)
-        self.assertEqual(dict["Antenna"]["VNSSEL"], 0)
-        self.assertEqual(dict["Antenna"]["HNSSEL"], 0)
-        self.assertEqual(dict["Antenna"]["HIATTEN"], 31.5)
-        self.assertEqual(dict["Antenna"]["HQATTEN"], 31.5)
-        self.assertEqual(dict["Antenna"]["VIATTEN"], 31.5)
-        self.assertEqual(dict["Antenna"]["VQATTEN"], 31.5)
+        for id in ["A", "B"]:
+            self.assertEqual(dict[id]["HIPOW"], -24)
+            self.assertEqual(dict[id]["HQPOW"], -24)
+            self.assertEqual(dict[id]["VIPOW"], -24)
+            self.assertEqual(dict[id]["VQPOW"], -24)
+            self.assertEqual(dict[id]["HITEMP"], 211)
+            self.assertEqual(dict[id]["HQTEMP"], 211)
+            self.assertEqual(dict[id]["VITEMP"], 211)
+            self.assertEqual(dict[id]["VQTEMP"], 211)
+            self.assertEqual(dict[id]["VNSSEL"], 0)
+            self.assertEqual(dict[id]["HNSSEL"], 0)
+            self.assertEqual(dict[id]["HIATTEN"], 31.5)
+            self.assertEqual(dict[id]["HQATTEN"], 31.5)
+            self.assertEqual(dict[id]["VIATTEN"], 31.5)
+            self.assertEqual(dict[id]["VQATTEN"], 31.5)
         
         """
             Assertions for the LO Noise module.
         """
-        self.assertEqual(dict["LONOISE"]["LOFREQ"], "LO_3_4GHZ")
+        self.assertEqual(dict["LONOISE"]["LOFREQ"][0], "LO_3_4GHZ")
+        self.assertEqual(dict["LONOISE"]["LOFREQ"][1], 0)
         self.assertEqual(dict["LONOISE"]["NSSTAT"], 0)
     
     """
@@ -188,7 +189,7 @@ class TestOVROMethods(unittest.TestCase):
     def test_selectNoiseSource(self):
         self.ovroObj.selectNoiseSource()
         
-        for key in self.dictOfAntennas.keys():
+        for key in ["A", "B"]:
             dict = self.ovroObj.getMonitorData()
             self.assertEqual(dict[key]["VNSSEL"], 1)
             self.assertEqual(dict[key]["HNSSEL"], 1)
@@ -206,7 +207,7 @@ class TestOVROMethods(unittest.TestCase):
     def test_selectRFSource(self):
         self.ovroObj.selectRFSource()
         
-        for key in self.dictOfAntennas.keys():
+        for key in ["A", "B"]:
             dict = self.ovroObj.getMonitorData()
             self.assertEqual(dict[key]["VNSSEL"], 0)
             self.assertEqual(dict[key]["HNSSEL"], 0)
@@ -230,10 +231,11 @@ class TestOVROMethods(unittest.TestCase):
             attens = check[1]["ATTEN"]
             lofrq = check[1]["LOFREQ"]
         
-            self.assertEqual(dict["LONOISE"]["LOFREQ"], 
+            self.assertEqual(dict["LONOISE"]["LOFREQ"][0], 
                              self.LOConstantNames[lofrq])
+            self.assertEqual(dict["LONOISE"]["LOFREQ"][1], 0)
         
-            for key in self.dictOfAntennas.keys():
+            for key in ["A", "B"]:
                 dict = self.ovroObj.getMonitorData()
                 self.assertEqual(dict[key]["VQATTEN"], attens["VQ"])
                 self.assertEqual(dict[key]["VIATTEN"], attens["VI"])
@@ -256,7 +258,7 @@ class TestOVROMethods(unittest.TestCase):
     def test_alterAntByDelta(self):
         self.ovroObj.alterAntByDelta(-10)
         
-        for key in self.dictOfAntennas.keys():
+        for key in ["A", "B"]:
             dict = self.ovroObj.getMonitorData()
             self.assertEqual(dict[key]["VQATTEN"], 21.5)
             self.assertEqual(dict[key]["VIATTEN"], 21.5)

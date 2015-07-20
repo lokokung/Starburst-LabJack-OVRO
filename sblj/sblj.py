@@ -340,7 +340,7 @@ class LONoiseLJ(StarburstLJ):
         
         setting = leftBit * 2 + rightBit
         freqName = self.LOConstantNames[setting]
-        return freqName
+        return freqName, setting
     def __getNSStatus(self):
         status = ljm.eReadName(self.handle, "EIO0")
         return status
