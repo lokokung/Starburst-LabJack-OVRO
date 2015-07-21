@@ -14,6 +14,15 @@ import gen_ovro as go
 import os
 import sys
 
+"""
+TestGenerateOVROBinary Test Group Description:
+    This group of tests makes sure that gen_ovro.py correctly packs its data
+    into structs and returns a binary string of the information. The tests
+    also verify that the binary string returned can then be properly read 
+    back into the correct values.
+    
+    Test Count: 3
+"""
 class TestGenerateOVROBinary(unittest.TestCase):
     # Redefine methods already used in Starburst pipeline so that the 
     # tests can be ran without unnecessary dependencies. 
