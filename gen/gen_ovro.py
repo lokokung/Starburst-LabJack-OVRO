@@ -30,6 +30,7 @@ def gen_ovro(ovro_dict, mk_xml=False):
     xmlFile = r'tmp/ovro_stateframe.xml'
     fmt = '<'
     buf = ''
+    xml = None
     
     # Append XML for Data cluster.
     if mk_xml:
@@ -363,7 +364,7 @@ def __lonoise_labjack(dict, xml, mk_xml):
     # ----------------------------------------------------------------------
     
     # Pack frequency as unsinged int
-    item = dict.get("LOFREQ", 0)
+    item = dict.get("LOFREQ", (0, 0))
     try:
         item = int(item[1])
     except ValueError:
