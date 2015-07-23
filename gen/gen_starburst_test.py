@@ -10,13 +10,13 @@ import struct
 import numpy as np
 import xml.etree.ElementTree as etree
 import copy
-import gen_ovro as go
+import gen_starburst as go
 import os
 import sys
 
 """
 TestGenerateOVROBinary Test Group Description:
-    This group of tests makes sure that gen_ovro.py correctly packs its data
+    This group of tests makes sure that gen_starburst.py correctly packs its data
     into structs and returns a binary string of the information. The tests
     also verify that the binary string returned can then be properly read 
     back into the correct values.
@@ -307,66 +307,66 @@ class TestGenerateOVROBinary(unittest.TestCase):
 
     def setUp(self):
         # Setup the values to be returned.
-        self.data = {"LONOISE": {"NAME": "LONoiseMod",
-                                 "LJTEMP": 300,
-                                 "LJAIRTEMP": 298,
-                                 "POW_24V": 24,
-                                 "POW_15V": 15,
-                                 "POW_12V": 12,
-                                 "POW_5V": 5,
-                                 "POW_N5V": -5,
-                                 "POW_S5V": 5,
-                                 "SERIAL": 1000,
-                                 "LOFREQ": ("LO_3_4GHZ", 0),
-                                 "NSSTAT": 0 },
-                     "A":       {"NAME": "AntennaA",
-                                 "LJTEMP": 300,
-                                 "LJAIRTEMP": 298,
-                                 "POW_24V": 24,
-                                 "POW_15V": 15,
-                                 "POW_12V": 12,
-                                 "POW_5V": 5,
-                                 "POW_N5V": -5,
-                                 "POW_S5V": 5,
-                                 "SERIAL": 2000,
-                                 "HIPOW": 0,
-                                 "HQPOW": 1,
-                                 "VIPOW": 2,
-                                 "VQPOW": 3,
-                                 "HITEMP": 100,
-                                 "HQTEMP": 101,
-                                 "VITEMP": 102,
-                                 "VQTEMP": 103,
-                                 "VNSSEL": 1,
-                                 "HNSSEL": 1,
-                                 "HIATTEN": 31.5,
-                                 "HQATTEN": 31.5,
-                                 "VIATTEN": 31.5,
-                                 "VQATTEN": 31.5 },
-                     "B":       {"NAME": "AntennaB",
-                                 "LJTEMP": 300,
-                                 "LJAIRTEMP": 298,
-                                 "POW_24V": 24,
-                                 "POW_15V": 15,
-                                 "POW_12V": 12,
-                                 "POW_5V": 5,
-                                 "POW_N5V": -5,
-                                 "POW_S5V": 5,
-                                 "SERIAL": 3000,
-                                 "HIPOW": 0,
-                                 "HQPOW": -1,
-                                 "VIPOW": -2,
-                                 "VQPOW": -3,
-                                 "HITEMP": 200,
-                                 "HQTEMP": 201,
-                                 "VITEMP": 202,
-                                 "VQTEMP": 203,
-                                 "VNSSEL": 0,
-                                 "HNSSEL": 0,
-                                 "HIATTEN": 0,
-                                 "HQATTEN": 0,
-                                 "VIATTEN": 0,
-                                 "VQATTEN": 0 } }
+        self.data = {"starburst": {"LONOISE": {"NAME": "LONoiseMod",
+                                               "LJTEMP": 300,
+                                               "LJAIRTEMP": 298,
+                                               "POW_24V": 24,
+                                               "POW_15V": 15,
+                                               "POW_12V": 12,
+                                               "POW_5V": 5,
+                                               "POW_N5V": -5,
+                                               "POW_S5V": 5,
+                                               "SERIAL": 1000,
+                                               "LOFREQ": ("LO_3_4GHZ", 0),
+                                               "NSSTAT": 0 },
+                                   "A":       {"NAME": "AntennaA",
+                                               "LJTEMP": 300,
+                                               "LJAIRTEMP": 298,
+                                               "POW_24V": 24,
+                                               "POW_15V": 15,
+                                               "POW_12V": 12,
+                                               "POW_5V": 5,
+                                               "POW_N5V": -5,
+                                               "POW_S5V": 5,
+                                               "SERIAL": 2000,
+                                               "HIPOW": 0,
+                                               "HQPOW": 1,
+                                               "VIPOW": 2,
+                                               "VQPOW": 3,
+                                               "HITEMP": 100,
+                                               "HQTEMP": 101,
+                                               "VITEMP": 102,
+                                               "VQTEMP": 103,
+                                               "VNSSEL": 1,
+                                               "HNSSEL": 1,
+                                               "HIATTEN": 31.5,
+                                               "HQATTEN": 31.5,
+                                               "VIATTEN": 31.5,
+                                               "VQATTEN": 31.5 },
+                                   "B":       {"NAME": "AntennaB",
+                                               "LJTEMP": 300,
+                                               "LJAIRTEMP": 298,
+                                               "POW_24V": 24,
+                                               "POW_15V": 15,
+                                               "POW_12V": 12,
+                                               "POW_5V": 5,
+                                               "POW_N5V": -5,
+                                               "POW_S5V": 5,
+                                               "SERIAL": 3000,
+                                               "HIPOW": 0,
+                                               "HQPOW": -1,
+                                               "VIPOW": -2,
+                                               "VQPOW": -3,
+                                               "HITEMP": 200,
+                                               "HQTEMP": 201,
+                                               "VITEMP": 202,
+                                               "VQTEMP": 203,
+                                               "VNSSEL": 0,
+                                               "HNSSEL": 0,
+                                               "HIATTEN": 0,
+                                               "HQATTEN": 0,
+                                               "VIATTEN": 0,
+                                               "VQATTEN": 0 } } }
         
         # Setup maps between the data set and the returned dictionary names.
         self.nameMap = {"Temp.labjack": "LJTEMP",
@@ -398,72 +398,72 @@ class TestGenerateOVROBinary(unittest.TestCase):
                         
     """
     Test - test_XMLFileIsGenerated:
-        Given that gen_ovro is called to create the XML file for parsing,
+        Given that gen_starburst_sf is called to create the XML file for parsing,
         Then the XML file exists at the location returned.
     """
     def test_XMLFileIsGenerated(self):
-        fmt, buf, xmlFile = go.gen_ovro(self.data, True)
+        fmt, buf, xmlFile = go.gen_starburst_sf(self.data, True)
         self.assertTrue(os.path.exists(xmlFile))
     
     """
     Test - test_sensibleEvenIfDictionaryIsEmpty:
-        Given that gen_ovro is passed an empty dictionary, 
+        Given that gen_starburst_sf is passed an empty dictionary, 
         Then the buffer string generated is not an empty string.
     """
     def test_sensibleEvenIfDictionaryIsEmpty(self):
-        fmt, buf, xmlFile = go.gen_ovro({})
+        fmt, buf, xmlFile = go.gen_starburst_sf({})
         self.assertTrue(sys.getsizeof(buf) != 0)
     
     """
     Test - test_stringBufferRevertsToActualValues:
-        Given that self.data is defined and passed to gen_ovro,
+        Given that self.data is defined and passed to gen_starburst_sf,
         Then the buffer generated decodes to the values in self.data.
     """
     def test_stringBufferRevertsToActualValues(self):
-        fmt, buf, xmlFile = go.gen_ovro(self.data, True)
+        fmt, buf, xmlFile = go.gen_starburst_sf(self.data, True)
         dict, version = self.xml_ptrs(xmlFile)
         
         # Test the LO/Noise Module values
-        testDic = dict["LONoiseModule"]
+        testDic = dict["Starburst"]["LONoiseModule"]
         for key, value in testDic.items():
             if key == "Name":
                 val1 = self.extract(buf, value)
                 val1 = val1.replace('\x00', '')
-                val2 = self.data["LONOISE"][self.nameMap[key]]
+                val2 = self.data['starburst']["LONOISE"][self.nameMap[key]]
                 self.assertEqual(val1, val2)
             elif key == "LOFrequency":
                 val1 = self.extract(buf, value)
-                val2 = self.data["LONOISE"][self.nameMap[key]][1]
+                val2 = self.data['starburst']["LONOISE"][self.nameMap[key]][1]
                 self.assertEqual(val1, val2)
             else:
                 val1 = self.extract(buf, value)
-                val2 = self.data["LONOISE"][self.nameMap[key]]
+                val2 = self.data['starburst']["LONOISE"][self.nameMap[key]]
                 self.assertEqual(val1, val2)
                 
         # Test the AntennaA Module values
-        testDic = dict["AntennaAModule"]
+        testDic = dict["Starburst"]["AntennaAModule"]
         for key, value in testDic.items():
             if key == "Name":
                 val1 = self.extract(buf, value)
                 val1 = val1.replace('\x00', '')
-                val2 = self.data["A"][self.nameMap[key]]
+                val2 = self.data['starburst']["A"][self.nameMap[key]]
                 self.assertEqual(val1, val2)
             else:
                 val1 = self.extract(buf, value)
-                val2 = self.data["A"][self.nameMap[key]]
+                val2 = self.data['starburst']["A"][self.nameMap[key]]
                 self.assertEqual(val1, val2)
                 
         # Test the AntennaB Module values
-        testDic = dict["AntennaBModule"]
+        testDic = dict["Starburst"]["AntennaBModule"]
         for key, value in testDic.items():
             if key == "Name":
                 val1 = self.extract(buf, value)
                 val1 = val1.replace('\x00', '')
-                val2 = self.data["B"][self.nameMap[key]]
+                val2 = self.data['starburst']["B"][self.nameMap[key]]
                 self.assertEqual(val1, val2)
             else:
                 val1 = self.extract(buf, value)
-                val2 = self.data["B"][self.nameMap[key]]
+                val2 = self.data['starburst']["B"][self.nameMap[key]]
                 self.assertEqual(val1, val2)
         
         
