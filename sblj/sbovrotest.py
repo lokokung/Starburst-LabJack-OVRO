@@ -7,13 +7,13 @@
 import unittest
 from labjack import ljm
 import sblj
-import ovro
+import sbovro
 import pickle
 
 """
 TestOVROMethods Test Group Description:
     This is a group of unit tests that test each method offered by the
-    ovro module. This group only provides for basic functionality 
+    sbovro module. This group only provides for basic functionality 
     testing.
     
     Test Count: 6
@@ -112,7 +112,7 @@ class TestOVROMethods(unittest.TestCase):
         ljm.eWriteName = self.eWriteName
         ljm.eWriteNameString = self.eWriteNameString
         
-        self.ovroObj = ovro.OVROStarburst("LONoise", "Antenna", "Antenna")
+        self.ovroObj = sbovro.OVROStarburst("LONoise", "Antenna", "Antenna")
         self.ovroObj.ljLONoise.handle = "LONoise"
         self.ovroObj.ljA.handle = "Antenna"
         self.ovroObj.ljB.handle = "Antenna"
@@ -240,7 +240,7 @@ class TestOVROMethods(unittest.TestCase):
         Then a InvalidBandError is raised.
     """
     def test_setToBandNonexistantBandRaisesError(self):
-        self.assertRaises(ovro.InvalidBandError, self.ovroObj.setToBand, 123)
+        self.assertRaises(sbovro.InvalidBandError, self.ovroObj.setToBand, 123)
         
     """
     Test - test_alterAntByDelta:
