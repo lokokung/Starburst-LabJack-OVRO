@@ -10,7 +10,7 @@ import struct
 import numpy as np
 import xml.etree.ElementTree as etree
 import copy
-import gen_starburst as go
+import gen_starburst_sf as go
 import os
 import sys
 
@@ -424,7 +424,7 @@ class TestGenerateOVROBinary(unittest.TestCase):
         dict, version = self.xml_ptrs(xmlFile)
         
         # Test the LO/Noise Module values
-        testDic = dict["Starburst"]["LONoiseModule"]
+        testDic = dict["Starburst"]["LONM"]
         for key, value in testDic.items():
             if key == "Name":
                 val1 = self.extract(buf, value)
@@ -441,7 +441,7 @@ class TestGenerateOVROBinary(unittest.TestCase):
                 self.assertEqual(val1, val2)
                 
         # Test the AntennaA Module values
-        testDic = dict["Starburst"]["AntennaAModule"]
+        testDic = dict["Starburst"]["DCMA"]
         for key, value in testDic.items():
             if key == "Name":
                 val1 = self.extract(buf, value)
@@ -454,7 +454,7 @@ class TestGenerateOVROBinary(unittest.TestCase):
                 self.assertEqual(val1, val2)
                 
         # Test the AntennaB Module values
-        testDic = dict["Starburst"]["AntennaBModule"]
+        testDic = dict["Starburst"]["DCMB"]
         for key, value in testDic.items():
             if key == "Name":
                 val1 = self.extract(buf, value)

@@ -766,7 +766,7 @@ def __starburst_stateframe(sf_dict, xml, mk_xml):
     # Append XML for LONoiseModule cluster.
     if mk_xml:
         xml.write('<Cluster>\n')
-        xml.write('<Name>LONoiseModule</Name>\n')
+        xml.write('<Name>LONM</Name>\n')
         xml.write('<NumElts>' + str(Nelements_lonoise) + '</NumElts>')
     
     # Handle all generic LabJack properties
@@ -792,7 +792,7 @@ def __starburst_stateframe(sf_dict, xml, mk_xml):
     # Append XML for LONoiseModule cluster.
     if mk_xml:
         xml.write('<Cluster>\n')
-        xml.write('<Name>AntennaAModule</Name>\n')
+        xml.write('<Name>DCMA</Name>\n')
         xml.write('<NumElts>' + str(Nelements_antenna) + '</NumElts>')
         
     # Handle all generic LabJack properties
@@ -818,7 +818,7 @@ def __starburst_stateframe(sf_dict, xml, mk_xml):
     # Append XML for LONoiseModule cluster.
     if mk_xml:
         xml.write('<Cluster>\n')
-        xml.write('<Name>AntennaBModule</Name>\n')
+        xml.write('<Name>DCMB</Name>\n')
         xml.write('<NumElts>' + str(Nelements_antenna) + '</NumElts>')
         
     # Handle all generic LabJack properties
