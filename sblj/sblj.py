@@ -534,6 +534,9 @@ class AntennaLJ(StarburstLJ):
         if newVal % 2 == 1:
             ljm.eWriteName(self.handle, "FIO0", 1)
             newVal = (newVal - 1) / 2
+        else:
+            ljm.eWriteName(self.handle, "FIO0", 0)
+            newVal = newVal / 2
         
         for i in range(1, 6):
             ljm.eWriteName(self.handle, attDict[i], newVal % 2)
